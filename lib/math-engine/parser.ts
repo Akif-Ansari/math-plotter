@@ -4,9 +4,10 @@ import * as math from 'mathjs';
  * Normalizes trigonometric & inverse trigonometric functions in user input strings.
  * Supports:
  *  - Standard trig: sin, cos, tan, sec, csc, cosec, cot
+ *  - Concatenated trig without space: tanx -> tan(x), cotx -> cot(x), sinx -> sin(x)
  *  - Inverse trig: arcsin, arccos, arctan, arcsec, arccsc, arccot, asin, acos, atan
- *  - Superscript inverse: sin^-1(x), sin^{-1}(x), cos^-1(x), tan^-1(x), etc.
- *  - Missing parentheses: sin x -> sin(x), sinx -> sin(x), cos 2x -> cos(2*x)
+ *  - Superscript inverse: sin^-1(x), sin^-1x, sin^{-1}(x), cos^-1(x), tan^-1(x), etc.
+ *  - Missing parentheses: sin x -> sin(x), tan x -> tan(x), cos 2x -> cos(2*x)
  */
 export function normalizeTrigExpressions(input: string): string {
   if (!input) return '';
@@ -35,23 +36,15 @@ export function normalizeTrigExpressions(input: string): string {
     .replace(/\\?arccsc/gi, 'acsc')
     .replace(/\\?arccot/gi, 'acot');
 
-  // 4. Missing parentheses for simple expressions like "tan x" -> "tan(x)", "sin 2x" -> "sin(2x)", "tanx" -> "tan(x)"
-  const trigFns = ['asin', 'acos', 'atan', 'asec', 'acsc', 'acot', 'sin', 'cos', 'tan', 'sec', 'csc', 'cot'];
-  for (const fn of trigFns) {
-    const spaceRegex = new RegExp(`\\\\?\\b${fn}\\s+([^\\s\\(\\)]+)`, 'gi');
-    s = s.replace(spaceRegex, `${fn}($1)`);
+  // 4. Missing parentheses for single variable concatenated without space:
+  // e.g. "tanx" -> "tan(x)", "cotx" -> "cot(x)", "sinx" -> "sin(x)", "cosx" -> "cos(x)", "secx" -> "sec(x)"
+  // MUST NOT be followed by '('
+  s = s.replace(/\\?(asin|acos|atan|asec|acsc|acot|sin|cos|tan|sec|csc|cot)(?!\()([xXyY\theta])(?![a-zA-Z0-9_])/gi, '$1($2)');
 
-    const directRegex = new RegExp(`\\\\?\\b${fn}([xXyY\\theta])(?![a-zA-Z0-9_\\(])`, 'gi');
-    s = s.replace(directRegex, `${fn}($1)`);
-  }
+  // 5. Space separated expressions: e.g. "tan 2x" -> "tan(2x)", "sin 3x" -> "sin(3x)"
+  s = s.replace(/\\?(asin|acos|atan|asec|acsc|acot|sin|cos|tan|sec|csc|cot)\s+([a-zA-Z0-9_\.\*\+\-\^]+)/gi, '$1($2)');
 
-  // 5. Expand reciprocal & inverse reciprocal functions for mathjs execution:
-  //    sec(u) -> (1 / cos(u))
-  //    csc(u) -> (1 / sin(u))
-  //    cot(u) -> (1 / tan(u))
-  //    asec(u) -> acos(1 / (u))
-  //    acsc(u) -> asin(1 / (u))
-  //    acot(u) -> atan(1 / (u))
+  // 6. Expand reciprocal trig functions for mathjs execution:
   s = s
     .replace(/\bsec\s*\(([^()]+)\)/gi, '(1 / cos($1))')
     .replace(/\bcsc\s*\(([^()]+)\)/gi, '(1 / sin($1))')
@@ -107,12 +100,13 @@ export function sanitizeMathString(input: string): string {
     .replace(/\^\{([^}]+)\}/g, '^($1)');
 
   // Implicit multiplication inserts: e.g. 2x -> 2*x, 3y -> 3*y, 3sin -> 3*sin, x sin -> x*sin, 3(x) -> 3*(x)
+  // IMPORTANT: Do NOT include \theta inside [] brackets because \t gets parsed as TAB matching letter 't'!
   cleaned = cleaned
-    .replace(/(\d+)([a-zA-Z\theta])/g, '$1*$2')
+    .replace(/(\d+)([a-zA-Z])/g, '$1*$2')
     .replace(/(\d+)\(/g, '$1*(')
     .replace(/\)(\d+)/g, ')*$1')
     .replace(/\)\(/g, ')*(')
-    .replace(/([xXyY\theta])([a-zA-Z])/g, (match, p1, p2) => {
+    .replace(/([xXyY])([a-zA-Z])/g, (match, p1, p2) => {
       if (['s', 'c', 't', 'l', 'a', 'p'].includes(p2)) {
         return `${p1}*${p2}`;
       }
@@ -189,14 +183,34 @@ export function compileExpression(rawInput: string, varName: 'x' | 'theta' | 't'
         if (varName === 'theta') localScope['t'] = v;
 
         const res = compiled.evaluate(localScope);
+
         if (typeof res === 'number') {
           return Number.isFinite(res) ? res : NaN;
         } else if (typeof res === 'boolean') {
           return res ? 1 : 0;
-        } else if (res && typeof res === 'object' && 're' in res) {
-          return Math.abs(res.im) < 1e-9 ? res.re : NaN;
+        } else if (res && typeof res === 'object') {
+          if ('re' in res && typeof (res as { re: number }).re === 'number') {
+            const complexRes = res as { re: number; im: number };
+            return Math.abs(complexRes.im) < 1e-9 ? complexRes.re : NaN;
+          }
+          if ('value' in res && typeof (res as { value: number }).value === 'number') {
+            return (res as { value: number }).value;
+          }
+          if (typeof (res as { toNumber?: () => number }).toNumber === 'function') {
+            const num = (res as { toNumber: () => number }).toNumber();
+            return Number.isFinite(num) ? num : NaN;
+          }
+          if (Array.isArray((res as { entries?: number[] }).entries)) {
+            const entries = (res as { entries: number[] }).entries;
+            if (entries.length > 0 && typeof entries[0] === 'number') {
+              return Number.isFinite(entries[0]) ? entries[0] : NaN;
+            }
+          }
+          const num = Number(res);
+          return Number.isFinite(num) ? num : NaN;
         }
-        return NaN;
+        const num = Number(res);
+        return Number.isFinite(num) ? num : NaN;
       } catch {
         return NaN;
       }
@@ -227,7 +241,8 @@ export function compile2DExpression(rawInput: string): { evalFn: Evaluator2DFn |
         if (typeof res === 'number') {
           return Number.isFinite(res) ? res : NaN;
         }
-        return NaN;
+        const num = Number(res);
+        return Number.isFinite(num) ? num : NaN;
       } catch {
         return NaN;
       }

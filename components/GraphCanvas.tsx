@@ -22,6 +22,7 @@ export default function GraphCanvas({
   onAnalysisUpdate,
 }: GraphCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const lastAnalysisRef = useRef<string>('');
 
   // Mouse interaction state
   const isDragging = useRef(false);
@@ -110,7 +111,13 @@ export default function GraphCanvas({
     }
 
     setSnapPoints(points);
-    onAnalysisUpdate(analyses);
+
+    // ONLY notify parent if analysis JSON has meaningfully changed!
+    const currentAnalysisStr = JSON.stringify(analyses);
+    if (currentAnalysisStr !== lastAnalysisRef.current) {
+      lastAnalysisRef.current = currentAnalysisStr;
+      onAnalysisUpdate(analyses);
+    }
   }, [expressions, viewport, onAnalysisUpdate]);
 
   useEffect(() => {
@@ -125,8 +132,8 @@ export default function GraphCanvas({
     if (!ctx) return;
 
     const dpr = window.devicePixelRatio || 1;
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
+    const width = canvas.clientWidth || 800;
+    const height = canvas.clientHeight || 600;
 
     if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
       canvas.width = width * dpr;

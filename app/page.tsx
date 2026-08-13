@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import Header from '@/components/Header';
 import ExpressionList from '@/components/ExpressionList';
 import GraphCanvas from '@/components/GraphCanvas';
@@ -36,6 +36,11 @@ export default function Home() {
   const [isDarkTheme, setIsDarkTheme] = useState<boolean>(true);
   const [analyses, setAnalyses] = useState<Record<string, AnalysisResult>>({});
   const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(null);
+
+  // Memoized analysis update to prevent React render loops
+  const handleAnalysisUpdate = useCallback((newAnalyses: Record<string, AnalysisResult>) => {
+    setAnalyses(newAnalyses);
+  }, []);
 
   // Expression actions
   const handleAddExpression = () => {
@@ -244,7 +249,7 @@ export default function Home() {
           viewport={viewport}
           onViewportChange={setViewport}
           isDarkTheme={isDarkTheme}
-          onAnalysisUpdate={setAnalyses}
+          onAnalysisUpdate={handleAnalysisUpdate}
         />
       </main>
 
