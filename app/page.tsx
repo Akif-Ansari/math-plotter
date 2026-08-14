@@ -1,13 +1,16 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import Header from '@/components/Header';
 import ExpressionList from '@/components/ExpressionList';
 import GraphCanvas from '@/components/GraphCanvas';
 import AnalysisModal from '@/components/AnalysisModal';
 import TableModal from '@/components/TableModal';
+import IntegralControlModal from '@/components/IntegralControlModal';
+import ParameterSlidersBar from '@/components/ParameterSlidersBar';
 import Footer from '@/components/Footer';
-import { MathExpression, Viewport, AnalysisResult } from '@/types/math';
+import { MathExpression, Viewport, AnalysisResult, IntegralConfig } from '@/types/math';
+import { extractParameters } from '@/lib/math-engine/parser';
 
 // Default page load: Single cartesian graph y = f(x)
 const INITIAL_EXPRESSIONS: MathExpression[] = [
@@ -39,6 +42,46 @@ export default function Home() {
   const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(null);
   const [isTableOpen, setIsTableOpen] = useState<boolean>(false);
   const [tableExpressionId, setTableExpressionId] = useState<string | null>(null);
+
+  // Dynamic parameters state (a, b, c, k, m)
+  const [parameters, setParameters] = useState<Record<string, number>>({
+    a: 1,
+    b: 1,
+    c: 0,
+    k: 1,
+    m: 1,
+  });
+
+  // Definite Integral & Riemann Sums state
+  const [integralConfig, setIntegralConfig] = useState<IntegralConfig>({
+    enabled: false,
+    expressionId: '1',
+    a: 0,
+    b: 2,
+    method: 'exact',
+    n: 10,
+  });
+  const [isIntegralOpen, setIsIntegralOpen] = useState<boolean>(false);
+
+  // Detect active parameters across visible expressions
+  const detectedParams = useMemo(() => {
+    const found = new Set<string>();
+    expressions.forEach((expr) => {
+      if (expr.visible) {
+        const p = extractParameters(expr.rawText);
+        p.forEach((param) => found.add(param));
+      }
+    });
+    return Array.from(found);
+  }, [expressions]);
+
+  const handleParameterChange = useCallback((name: string, val: number) => {
+    setParameters((prev) => ({ ...prev, [name]: val }));
+  }, []);
+
+  const handleParameterReset = useCallback((name: string) => {
+    setParameters((prev) => ({ ...prev, [name]: name === 'c' ? 0 : 1 }));
+  }, []);
 
   // Memoized analysis update to prevent React render loops
   const handleAnalysisUpdate = useCallback((newAnalyses: Record<string, AnalysisResult>) => {
@@ -235,6 +278,7 @@ export default function Home() {
           setTableExpressionId(null);
           setIsTableOpen(true);
         }}
+        onOpenIntegral={() => setIsIntegralOpen(true)}
       />
 
       {/* Main Graphing Interface */}
@@ -251,6 +295,10 @@ export default function Home() {
             setTableExpressionId(id || null);
             setIsTableOpen(true);
           }}
+          onOpenIntegral={(id) => {
+            setIntegralConfig((prev) => ({ ...prev, expressionId: id, enabled: true }));
+            setIsIntegralOpen(true);
+          }}
           analyses={analyses}
         />
 
@@ -261,6 +309,17 @@ export default function Home() {
           onViewportChange={setViewport}
           isDarkTheme={isDarkTheme}
           onAnalysisUpdate={handleAnalysisUpdate}
+          parameters={parameters}
+          integralConfig={integralConfig}
+          onOpenIntegralModal={() => setIsIntegralOpen(true)}
+        />
+
+        {/* Floating Parameter Sliders Bar */}
+        <ParameterSlidersBar
+          parameters={parameters}
+          onChangeParameter={handleParameterChange}
+          onResetParameter={handleParameterReset}
+          detectedParams={detectedParams}
         />
       </main>
 
@@ -280,6 +339,17 @@ export default function Home() {
           initialExpressionId={tableExpressionId}
           viewport={viewport}
           onClose={() => setIsTableOpen(false)}
+        />
+      )}
+
+      {/* Definite Integral & Riemann Sums Control Modal */}
+      {isIntegralOpen && (
+        <IntegralControlModal
+          expressions={expressions}
+          config={integralConfig}
+          onChangeConfig={setIntegralConfig}
+          onClose={() => setIsIntegralOpen(false)}
+          parameters={parameters}
         />
       )}
 

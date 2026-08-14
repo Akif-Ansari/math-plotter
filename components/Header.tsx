@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { RotateCcw, Download, Sun, Moon, Table as TableIcon } from 'lucide-react';
+import { RotateCcw, Download, Sun, Moon, Table as TableIcon, Sigma } from 'lucide-react';
 
 interface HeaderProps {
   onResetView: () => void;
@@ -10,6 +10,7 @@ interface HeaderProps {
   isDarkTheme: boolean;
   onToggleTheme: () => void;
   onOpenTable?: () => void;
+  onOpenIntegral?: () => void;
 }
 
 export default function Header({
@@ -19,6 +20,7 @@ export default function Header({
   isDarkTheme,
   onToggleTheme,
   onOpenTable,
+  onOpenIntegral,
 }: HeaderProps) {
   return (
     <header className="h-16 bg-zinc-900 border-b border-zinc-800 text-white px-4 flex items-center justify-between select-none shadow-lg z-20">
@@ -67,6 +69,17 @@ export default function Header({
           >
             <TableIcon className="w-3.5 h-3.5 text-emerald-400" />
             <span className="hidden md:inline">Table of Values</span>
+          </button>
+        )}
+
+        {onOpenIntegral && (
+          <button
+            onClick={onOpenIntegral}
+            title="Configure Definite Integral & Riemann Sums"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg border border-zinc-700 transition cursor-pointer"
+          >
+            <Sigma className="w-3.5 h-3.5 text-purple-400" />
+            <span className="hidden md:inline">Definite Integral</span>
           </button>
         )}
 

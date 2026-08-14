@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { MathExpression, Viewport, SnapPoint, AnalysisResult, TangentInfo } from '@/types/math';
+import { MathExpression, Viewport, SnapPoint, AnalysisResult, TangentInfo, IntegralConfig } from '@/types/math';
 import { compileExpression, compile2DExpression, isImplicitEquation } from '@/lib/math-engine/parser';
 import { analyzeFunction, findIntersections } from '@/lib/math-engine/analysis';
-import { ZoomIn, ZoomOut, Maximize2, Move, Compass } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize2, Move, Compass, Sigma } from 'lucide-react';
 
 interface GraphCanvasProps {
   expressions: MathExpression[];
@@ -12,6 +12,9 @@ interface GraphCanvasProps {
   onViewportChange: (newViewport: Viewport) => void;
   isDarkTheme: boolean;
   onAnalysisUpdate: (analyses: Record<string, AnalysisResult>) => void;
+  parameters?: Record<string, number>;
+  integralConfig?: IntegralConfig;
+  onOpenIntegralModal?: () => void;
 }
 
 export default function GraphCanvas({
@@ -20,6 +23,9 @@ export default function GraphCanvas({
   onViewportChange,
   isDarkTheme,
   onAnalysisUpdate,
+  parameters = {},
+  integralConfig,
+  onOpenIntegralModal,
 }: GraphCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const lastAnalysisRef = useRef<string>('');
@@ -140,22 +146,25 @@ export default function GraphCanvas({
 
   // Main Canvas Render Loop
   const renderCanvas = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    try {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
 
-    const dpr = window.devicePixelRatio || 1;
-    const width = canvas.clientWidth || 800;
-    const height = canvas.clientHeight || 600;
+      const dpr = window.devicePixelRatio || 1;
+      const width = canvas.clientWidth || 800;
+      const height = canvas.clientHeight || 600;
 
-    if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
-    }
+      if (width === 0 || height === 0) return;
 
-    ctx.save();
-    ctx.scale(dpr, dpr);
+      if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+      }
+
+      ctx.save();
+      ctx.scale(dpr, dpr);
 
     // Color Palette based on theme
     const bg = isDarkTheme ? '#09090B' : '#F8FAFC';
@@ -299,7 +308,7 @@ export default function GraphCanvas({
         (expr.type === 'cartesian' && isImplicitEquation(expr.rawText));
 
       if (isImplicit) {
-        const { evalFn: eval2D } = compile2DExpression(expr.rawText);
+        const { evalFn: eval2D } = compile2DExpression(expr.rawText, parameters);
         if (eval2D) {
           ctx.beginPath();
           const GRID_X = 180;
@@ -352,7 +361,7 @@ export default function GraphCanvas({
           ctx.stroke();
         }
       } else if (expr.type === 'x_of_y') {
-        const { evalFn } = compileExpression(expr.rawText, 'y');
+        const { evalFn } = compileExpression(expr.rawText, 'y', parameters);
         if (evalFn) {
           ctx.beginPath();
           let isPlotting = false;
@@ -395,7 +404,7 @@ export default function GraphCanvas({
           ctx.stroke();
         }
       } else if (expr.type === 'cartesian') {
-        const { evalFn } = compileExpression(expr.rawText, 'x');
+        const { evalFn } = compileExpression(expr.rawText, 'x', parameters);
         if (evalFn) {
           ctx.beginPath();
           let isPlotting = false;
@@ -417,7 +426,8 @@ export default function GraphCanvas({
               const isAsymptoteJump =
                 prevMathY !== null &&
                 Math.sign(prevMathY) !== Math.sign(mathY) &&
-                (Math.abs(prevMathY) > (yMax - yMin) * 0.3 || Math.abs(mathY) > (yMax - yMin) * 0.3);
+                Math.abs(prevMathY) > (yMax - yMin) * 0.4 &&
+                Math.abs(mathY) > (yMax - yMin) * 0.4;
 
               if (isAsymptoteJump) {
                 ctx.moveTo(sx, clampedSy);
@@ -441,7 +451,7 @@ export default function GraphCanvas({
           ctx.stroke();
         }
       } else if (expr.type === 'polar') {
-        const { evalFn } = compileExpression(expr.rawText, 'theta');
+        const { evalFn } = compileExpression(expr.rawText, 'theta', parameters);
         if (evalFn) {
           ctx.beginPath();
           let isPlotting = false;
@@ -469,8 +479,8 @@ export default function GraphCanvas({
           ctx.stroke();
         }
       } else if (expr.type === 'parametric' && expr.parametricX && expr.parametricY) {
-        const { evalFn: fnX } = compileExpression(expr.parametricX, 't');
-        const { evalFn: fnY } = compileExpression(expr.parametricY, 't');
+        const { evalFn: fnX } = compileExpression(expr.parametricX, 't', parameters);
+        const { evalFn: fnY } = compileExpression(expr.parametricY, 't', parameters);
         if (fnX && fnY) {
           ctx.beginPath();
           let isPlotting = false;
@@ -612,17 +622,142 @@ export default function GraphCanvas({
       ctx.restore();
     }
 
+    // 6. Draw Definite Integral Area & Riemann Sum Rectangles
+    if (integralConfig?.enabled) {
+      const primaryExpr = expressions.find((e) => e.id === integralConfig.expressionId && e.visible);
+      const secondaryExpr = expressions.find((e) => e.id === integralConfig.expressionId2 && e.visible);
+
+      if (primaryExpr) {
+        const { evalFn: f1 } = compileExpression(primaryExpr.rawText, 'x', parameters);
+        const { evalFn: f2 } = secondaryExpr ? compileExpression(secondaryExpr.rawText, 'x', parameters) : { evalFn: null };
+
+        if (f1) {
+          ctx.save();
+          const a = Math.min(integralConfig.a, integralConfig.b);
+          const b = Math.max(integralConfig.a, integralConfig.b);
+          const getVal = (xVal: number) => {
+            const v1 = f1(xVal);
+            const v2 = f2 ? f2(xVal) : 0;
+            if (!Number.isFinite(v1) || (f2 && !Number.isFinite(v2))) return 0;
+            return v1 - v2;
+          };
+
+          const fillColor = 'rgba(168, 85, 247, 0.25)';
+          const strokeColor = '#A855F7';
+
+          if (integralConfig.method === 'exact') {
+            ctx.fillStyle = fillColor;
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+
+            const startSx = toScreenX(a);
+            const startSy = toScreenY(0);
+            ctx.moveTo(startSx, startSy);
+
+            const steps = Math.max(100, Math.floor((b - a) * 25));
+            const stepDx = (b - a) / steps;
+
+            for (let i = 0; i <= steps; i++) {
+              const xVal = a + i * stepDx;
+              const yVal = getVal(xVal);
+              const sx = toScreenX(xVal);
+              const sy = toScreenY(yVal);
+              ctx.lineTo(sx, sy);
+            }
+
+            const endSx = toScreenX(b);
+            const endSy = toScreenY(0);
+            ctx.lineTo(endSx, endSy);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+          } else {
+            // Riemann Sum Discrete Rectangles / Trapezoids
+            const n = Math.max(1, integralConfig.n);
+            const h = (b - a) / n;
+
+            for (let i = 0; i < n; i++) {
+              const xLeft = a + i * h;
+              const xRight = xLeft + h;
+
+              if (integralConfig.method === 'trapezoidal') {
+                const y1 = getVal(xLeft);
+                const y2 = getVal(xRight);
+                const sx1 = toScreenX(xLeft);
+                const sx2 = toScreenX(xRight);
+                const sy1 = toScreenY(y1);
+                const sy2 = toScreenY(y2);
+                const sy0 = toScreenY(0);
+
+                ctx.fillStyle = fillColor;
+                ctx.strokeStyle = strokeColor;
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(sx1, sy0);
+                ctx.lineTo(sx1, sy1);
+                ctx.lineTo(sx2, sy2);
+                ctx.lineTo(sx2, sy0);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+              } else {
+                let sampleX = xLeft;
+                if (integralConfig.method === 'right') sampleX = xRight;
+                if (integralConfig.method === 'midpoint') sampleX = (xLeft + xRight) / 2;
+
+                const rectY = getVal(sampleX);
+                const sx1 = toScreenX(xLeft);
+                const sx2 = toScreenX(xRight);
+                const sy0 = toScreenY(0);
+                const syTop = toScreenY(rectY);
+
+                const rectWidth = sx2 - sx1;
+                const rectHeight = sy0 - syTop;
+
+                ctx.fillStyle = fillColor;
+                ctx.strokeStyle = strokeColor;
+                ctx.lineWidth = 1.5;
+                ctx.fillRect(sx1, syTop, rectWidth, rectHeight);
+                ctx.strokeRect(sx1, syTop, rectWidth, rectHeight);
+              }
+            }
+          }
+
+          ctx.restore();
+        }
+      }
+    }
+
     ctx.restore();
-  }, [viewport, expressions, snapPoints, hoverInfo, isDarkTheme, isTangentMode, tangentInfo]);
+  } catch (err) {
+    console.error('Canvas render error:', err);
+  }
+  }, [viewport, expressions, snapPoints, hoverInfo, isDarkTheme, isTangentMode, tangentInfo, parameters, integralConfig]);
 
   useEffect(() => {
     renderCanvas();
   }, [renderCanvas]);
 
   useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
     const handleResize = () => renderCanvas();
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+
+    const observer = new ResizeObserver(() => {
+      renderCanvas();
+    });
+    observer.observe(canvas);
+    if (canvas.parentElement) {
+      observer.observe(canvas.parentElement);
+    }
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      observer.disconnect();
+    };
   }, [renderCanvas]);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -668,7 +803,7 @@ export default function GraphCanvas({
     if (isTangentMode) {
       const activeCartesian = expressions.find((e) => e.visible && e.type === 'cartesian');
       if (activeCartesian) {
-        const { evalFn } = compileExpression(activeCartesian.rawText, 'x');
+        const { evalFn } = compileExpression(activeCartesian.rawText, 'x', parameters);
         if (evalFn) {
           const yVal = evalFn(mathX);
           if (Number.isFinite(yVal) && !isNaN(yVal)) {
@@ -993,17 +1128,28 @@ export default function GraphCanvas({
 
       {/* On-Canvas Zoom & Navigation Toolbar */}
       <div className="absolute bottom-6 right-6 flex flex-col gap-2 z-10">
+        {onOpenIntegralModal && (
+          <button
+            onClick={onOpenIntegralModal}
+            title="Configure Definite Integral & Riemann Sums"
+            className={`p-2.5 rounded-xl border shadow-lg backdrop-blur-md transition cursor-pointer ${integralConfig?.enabled
+                ? 'bg-purple-500/20 border-purple-500 text-purple-400 shadow-purple-500/10'
+                : 'bg-zinc-900/90 hover:bg-zinc-800 border-zinc-700/80 text-zinc-200 hover:text-white'
+              }`}
+          >
+            <Sigma className="w-4 h-4" />
+          </button>
+        )}
         <button
           onClick={() => {
             setIsTangentMode((prev) => !prev);
             if (isTangentMode) setTangentInfo(null);
           }}
           title={isTangentMode ? 'Disable Tangent Explorer' : 'Enable Tangent Explorer'}
-          className={`p-2.5 rounded-xl border shadow-lg backdrop-blur-md transition cursor-pointer ${
-            isTangentMode
+          className={`p-2.5 rounded-xl border shadow-lg backdrop-blur-md transition cursor-pointer ${isTangentMode
               ? 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-amber-500/10'
               : 'bg-zinc-900/90 hover:bg-zinc-800 border-zinc-700/80 text-zinc-200 hover:text-white'
-          }`}
+            }`}
         >
           <Compass className="w-4 h-4" />
         </button>

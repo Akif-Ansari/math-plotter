@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { MathExpression, MathFunctionType, LineStyleType, AnalysisResult } from '@/types/math';
+import { extractParameters } from '@/lib/math-engine/parser';
 import KaTeXRenderer from './KaTeXRenderer';
 import {
   Plus,
@@ -15,6 +16,7 @@ import {
   Sliders,
   Copy,
   Table as TableIcon,
+  Sigma,
 } from 'lucide-react';
 
 interface ExpressionListProps {
@@ -25,6 +27,7 @@ interface ExpressionListProps {
   onDuplicateExpression: (id: string) => void;
   onOpenAnalysis: (id: string) => void;
   onOpenTable?: (id?: string) => void;
+  onOpenIntegral?: (id: string) => void;
   analyses: Record<string, AnalysisResult>;
 }
 
@@ -47,6 +50,7 @@ export default function ExpressionList({
   onDuplicateExpression,
   onOpenAnalysis,
   onOpenTable,
+  onOpenIntegral,
   analyses,
 }: ExpressionListProps) {
   const [activeInputId, setActiveInputId] = useState<string | null>(null);
@@ -212,6 +216,15 @@ export default function ExpressionList({
                           className="p-1 text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800 rounded transition cursor-pointer"
                         >
                           <TableIcon className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                      {onOpenIntegral && (
+                        <button
+                          onClick={() => onOpenIntegral(expr.id)}
+                          title="Definite Integral & Riemann Sums"
+                          className="p-1 text-zinc-400 hover:text-purple-400 hover:bg-zinc-800 rounded transition cursor-pointer"
+                        >
+                          <Sigma className="w-3.5 h-3.5" />
                         </button>
                       )}
                     </>

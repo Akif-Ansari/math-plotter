@@ -70,3 +70,13 @@ export interface TangentInfo {
   equation: string;
   angleDegrees: number;
 }
+
+export interface IntegralConfig {
+  enabled: boolean;
+  expressionId: string;
+  expressionId2?: string | null;
+  a: number;
+  b: number;
+  method: 'exact' | 'left' | 'right' | 'midpoint' | 'trapezoidal';
+  n: number;
+}

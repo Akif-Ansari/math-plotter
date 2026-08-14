@@ -166,7 +166,14 @@ export type Evaluator2DFn = (x: number, y: number) => number;
 /**
  * Compiles a 1D mathematical string expression for variable 'x' or 'theta' or 't' or 'y'.
  */
-export function compileExpression(rawInput: string, varName: 'x' | 'theta' | 't' | 'y' = 'x'): { evalFn: EvaluatorFn | null; error: string | null } {
+/**
+ * Compiles a 1D mathematical string expression for variable 'x' or 'theta' or 't' or 'y'.
+ */
+export function compileExpression(
+  rawInput: string,
+  varName: 'x' | 'theta' | 't' | 'y' = 'x',
+  params: Record<string, number> = {}
+): { evalFn: EvaluatorFn | null; error: string | null } {
   try {
     const sanitized = sanitizeMathString(rawInput);
     if (!sanitized) {
@@ -177,7 +184,7 @@ export function compileExpression(rawInput: string, varName: 'x' | 'theta' | 't'
 
     const evalFn: EvaluatorFn = (v: number) => {
       try {
-        const localScope: Record<string, number> = { [varName]: v };
+        const localScope: Record<string, number> = { ...params, [varName]: v };
         if (varName === 'x') localScope['X'] = v;
         if (varName === 'y') localScope['Y'] = v;
         if (varName === 'theta') localScope['t'] = v;
@@ -226,7 +233,10 @@ export function compileExpression(rawInput: string, varName: 'x' | 'theta' | 't'
 /**
  * Compiles a 2D implicit equation F(x, y) = 0.
  */
-export function compile2DExpression(rawInput: string): { evalFn: Evaluator2DFn | null; error: string | null } {
+export function compile2DExpression(
+  rawInput: string,
+  params: Record<string, number> = {}
+): { evalFn: Evaluator2DFn | null; error: string | null } {
   try {
     const sanitized = sanitize2DMathString(rawInput);
     if (!sanitized) {
@@ -237,7 +247,7 @@ export function compile2DExpression(rawInput: string): { evalFn: Evaluator2DFn |
 
     const evalFn: Evaluator2DFn = (x: number, y: number) => {
       try {
-        const res = compiled.evaluate({ x, y, X: x, Y: y });
+        const res = compiled.evaluate({ ...params, x, y, X: x, Y: y });
         if (typeof res === 'number') {
           return Number.isFinite(res) ? res : NaN;
         }
@@ -253,6 +263,26 @@ export function compile2DExpression(rawInput: string): { evalFn: Evaluator2DFn |
     const msg = err instanceof Error ? err.message : 'Invalid implicit expression';
     return { evalFn: null, error: msg };
   }
+}
+
+/**
+ * Extracts variable parameters like 'a', 'b', 'c', 'k', 'm' from input math string.
+ */
+export function extractParameters(rawInput: string): string[] {
+  if (!rawInput) return [];
+  const reserved = new Set([
+    'x', 'y', 't', 'theta', 'X', 'Y', 'sin', 'cos', 'tan', 'sec', 'csc', 'cot',
+    'asin', 'acos', 'atan', 'asec', 'acsc', 'acot', 'sinh', 'cosh', 'tanh',
+    'log', 'log10', 'ln', 'sqrt', 'root', 'abs', 'exp', 'pi', 'e', 'min', 'max'
+  ]);
+  const matches = rawInput.match(/\b[a-zA-Z_][a-zA-Z0-9_]*\b/g) || [];
+  const found = new Set<string>();
+  matches.forEach((m) => {
+    if (!reserved.has(m) && !reserved.has(m.toLowerCase())) {
+      found.add(m);
+    }
+  });
+  return Array.from(found);
 }
 
 /**
