@@ -24,6 +24,16 @@ export default function GraphCanvas({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const lastAnalysisRef = useRef<string>('');
 
+  const viewportRef = useRef(viewport);
+  useEffect(() => {
+    viewportRef.current = viewport;
+  }, [viewport]);
+
+  const onViewportChangeRef = useRef(onViewportChange);
+  useEffect(() => {
+    onViewportChangeRef.current = onViewportChange;
+  }, [onViewportChange]);
+
   // Mouse interaction state
   const isDragging = useRef(false);
   const lastMousePos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -620,37 +630,213 @@ export default function GraphCanvas({
     isDragging.current = false;
   };
 
-  const handleWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
-    e.preventDefault();
-    const zoomFactor = e.deltaY < 0 ? 0.85 : 1.15;
-    applyZoom(zoomFactor);
-  };
+  // Helper to apply focal zoom & drag shift
+  const applyFocalZoomAndPan = useCallback(
+    (
+      factor: number,
+      focalScreenX: number,
+      focalScreenY: number,
+      shiftScreenX: number = 0,
+      shiftScreenY: number = 0
+    ) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const width = canvas.clientWidth || 800;
+      const height = canvas.clientHeight || 600;
+
+      const { xMin, xMax, yMin, yMax } = viewportRef.current;
+
+      const mathX = xMin + (focalScreenX / width) * (xMax - xMin);
+      const mathY = yMin + ((height - focalScreenY) / height) * (yMax - yMin);
+
+      const spanX = xMax - xMin;
+      const spanY = yMax - yMin;
+
+      const newSpanX = spanX * factor;
+      const newSpanY = spanY * factor;
+
+      const ratioX = (mathX - xMin) / spanX;
+      const ratioY = (mathY - yMin) / spanY;
+
+      const mathShiftX = -(shiftScreenX / width) * newSpanX;
+      const mathShiftY = (shiftScreenY / height) * newSpanY;
+
+      const nextXMin = mathX - ratioX * newSpanX + mathShiftX;
+      const nextXMax = nextXMin + newSpanX;
+      const nextYMin = mathY - ratioY * newSpanY + mathShiftY;
+      const nextYMax = nextYMin + newSpanY;
+
+      onViewportChangeRef.current({
+        xMin: nextXMin,
+        xMax: nextXMax,
+        yMin: nextYMin,
+        yMax: nextYMax,
+      });
+    },
+    []
+  );
+
+  // Attach non-passive wheel, touch, and gesture listeners directly to canvas element
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    let touchMode: 'none' | 'pan' | 'pinch' = 'none';
+    let lastSingleTouch: { x: number; y: number } | null = null;
+    let lastPinchDist: number | null = null;
+    let lastPinchMidpoint: { x: number; y: number } | null = null;
+
+    const handleWheelNative = (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const rect = canvas.getBoundingClientRect();
+      const sx = e.clientX - rect.left;
+      const sy = e.clientY - rect.top;
+
+      let zoomFactor: number;
+      if (e.ctrlKey) {
+        // Trackpad pinch gesture in Chrome/Safari emits wheel event with e.ctrlKey = true
+        zoomFactor = Math.pow(1.006, e.deltaY);
+      } else {
+        // Standard mouse wheel scrolling
+        zoomFactor = e.deltaY < 0 ? 0.85 : 1.15;
+      }
+
+      zoomFactor = Math.max(0.7, Math.min(1.4, zoomFactor));
+      applyFocalZoomAndPan(zoomFactor, sx, sy);
+    };
+
+    const handleTouchStartNative = (e: TouchEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const rect = canvas.getBoundingClientRect();
+      if (e.touches.length === 1) {
+        touchMode = 'pan';
+        lastSingleTouch = {
+          x: e.touches[0].clientX - rect.left,
+          y: e.touches[0].clientY - rect.top,
+        };
+        lastPinchDist = null;
+        lastPinchMidpoint = null;
+      } else if (e.touches.length >= 2) {
+        touchMode = 'pinch';
+        const t1 = e.touches[0];
+        const t2 = e.touches[1];
+        const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+        lastPinchDist = dist;
+        lastPinchMidpoint = {
+          x: (t1.clientX + t2.clientX) / 2 - rect.left,
+          y: (t1.clientY + t2.clientY) / 2 - rect.top,
+        };
+        lastSingleTouch = null;
+      }
+    };
+
+    const handleTouchMoveNative = (e: TouchEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const rect = canvas.getBoundingClientRect();
+
+      if (e.touches.length === 1 && touchMode === 'pan' && lastSingleTouch) {
+        const curX = e.touches[0].clientX - rect.left;
+        const curY = e.touches[0].clientY - rect.top;
+        const dx = curX - lastSingleTouch.x;
+        const dy = curY - lastSingleTouch.y;
+        lastSingleTouch = { x: curX, y: curY };
+
+        applyFocalZoomAndPan(1.0, curX, curY, dx, dy);
+      } else if (e.touches.length >= 2) {
+        const t1 = e.touches[0];
+        const t2 = e.touches[1];
+        const currentDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+        const currentMid = {
+          x: (t1.clientX + t2.clientX) / 2 - rect.left,
+          y: (t1.clientY + t2.clientY) / 2 - rect.top,
+        };
+
+        if (lastPinchDist && lastPinchDist > 0 && currentDist > 0) {
+          let zoomFactor = lastPinchDist / currentDist;
+          zoomFactor = Math.max(0.6, Math.min(1.6, zoomFactor));
+
+          const shiftX = lastPinchMidpoint ? currentMid.x - lastPinchMidpoint.x : 0;
+          const shiftY = lastPinchMidpoint ? currentMid.y - lastPinchMidpoint.y : 0;
+
+          applyFocalZoomAndPan(zoomFactor, currentMid.x, currentMid.y, shiftX, shiftY);
+        }
+
+        lastPinchDist = currentDist;
+        lastPinchMidpoint = currentMid;
+      }
+    };
+
+    const handleTouchEndNative = (e: TouchEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const rect = canvas.getBoundingClientRect();
+      if (e.touches.length === 0) {
+        touchMode = 'none';
+        lastSingleTouch = null;
+        lastPinchDist = null;
+        lastPinchMidpoint = null;
+      } else if (e.touches.length === 1) {
+        touchMode = 'pan';
+        lastSingleTouch = {
+          x: e.touches[0].clientX - rect.left,
+          y: e.touches[0].clientY - rect.top,
+        };
+        lastPinchDist = null;
+        lastPinchMidpoint = null;
+      }
+    };
+
+    const handleGestureNative = (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    // Passive: false is crucial so preventDefault stops page zoom
+    canvas.addEventListener('wheel', handleWheelNative, { passive: false });
+    canvas.addEventListener('touchstart', handleTouchStartNative, { passive: false });
+    canvas.addEventListener('touchmove', handleTouchMoveNative, { passive: false });
+    canvas.addEventListener('touchend', handleTouchEndNative, { passive: false });
+    canvas.addEventListener('touchcancel', handleTouchEndNative, { passive: false });
+    canvas.addEventListener('gesturestart', handleGestureNative, { passive: false });
+    canvas.addEventListener('gesturechange', handleGestureNative, { passive: false });
+    canvas.addEventListener('gestureend', handleGestureNative, { passive: false });
+
+    return () => {
+      canvas.removeEventListener('wheel', handleWheelNative);
+      canvas.removeEventListener('touchstart', handleTouchStartNative);
+      canvas.removeEventListener('touchmove', handleTouchMoveNative);
+      canvas.removeEventListener('touchend', handleTouchEndNative);
+      canvas.removeEventListener('touchcancel', handleTouchEndNative);
+      canvas.removeEventListener('gesturestart', handleGestureNative);
+      canvas.removeEventListener('gesturechange', handleGestureNative);
+      canvas.removeEventListener('gestureend', handleGestureNative);
+    };
+  }, [applyFocalZoomAndPan]);
 
   const applyZoom = (factor: number) => {
-    const { xMin, xMax, yMin, yMax } = viewport;
-    const centerX = (xMin + xMax) / 2;
-    const centerY = (yMin + yMax) / 2;
-    const halfSpanX = ((xMax - xMin) * factor) / 2;
-    const halfSpanY = ((yMax - yMin) * factor) / 2;
-
-    onViewportChange({
-      xMin: centerX - halfSpanX,
-      xMax: centerX + halfSpanX,
-      yMin: centerY - halfSpanY,
-      yMax: centerY + halfSpanY,
-    });
+    const canvas = canvasRef.current;
+    const width = canvas?.clientWidth || 800;
+    const height = canvas?.clientHeight || 600;
+    applyFocalZoomAndPan(factor, width / 2, height / 2);
   };
 
   return (
-    <div className="relative flex-1 h-full w-full overflow-hidden bg-zinc-950 select-none">
+    <div className="relative flex-1 h-full w-full overflow-hidden bg-zinc-950 select-none touch-none" style={{ touchAction: 'none' }}>
       <canvas
         ref={canvasRef}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        onWheel={handleWheel}
-        className="w-full h-full cursor-crosshair block"
+        className="w-full h-full cursor-crosshair block touch-none"
+        style={{ touchAction: 'none' }}
       />
 
       {/* Floating Viewport Coordinates & Hover Tooltip */}
