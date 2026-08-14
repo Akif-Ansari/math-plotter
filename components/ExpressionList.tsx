@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Sliders,
   Copy,
+  Table as TableIcon,
 } from 'lucide-react';
 
 interface ExpressionListProps {
@@ -23,6 +24,7 @@ interface ExpressionListProps {
   onDeleteExpression: (id: string) => void;
   onDuplicateExpression: (id: string) => void;
   onOpenAnalysis: (id: string) => void;
+  onOpenTable?: (id?: string) => void;
   analyses: Record<string, AnalysisResult>;
 }
 
@@ -44,6 +46,7 @@ export default function ExpressionList({
   onDeleteExpression,
   onDuplicateExpression,
   onOpenAnalysis,
+  onOpenTable,
   analyses,
 }: ExpressionListProps) {
   const [activeInputId, setActiveInputId] = useState<string | null>(null);
@@ -194,13 +197,24 @@ export default function ExpressionList({
                   </button>
 
                   {expr.type === 'cartesian' && (
-                    <button
-                      onClick={() => onOpenAnalysis(expr.id)}
-                      title="Calculus Analysis (Roots, Domain, Range, Asymptotes)"
-                      className="p-1 text-zinc-400 hover:text-indigo-400 hover:bg-zinc-800 rounded transition cursor-pointer"
-                    >
-                      <BarChart2 className="w-3.5 h-3.5" />
-                    </button>
+                    <>
+                      <button
+                        onClick={() => onOpenAnalysis(expr.id)}
+                        title="Calculus Analysis (Roots, Domain, Range, Asymptotes)"
+                        className="p-1 text-zinc-400 hover:text-indigo-400 hover:bg-zinc-800 rounded transition cursor-pointer"
+                      >
+                        <BarChart2 className="w-3.5 h-3.5" />
+                      </button>
+                      {onOpenTable && (
+                        <button
+                          onClick={() => onOpenTable(expr.id)}
+                          title="Table of Values (x vs f(x))"
+                          className="p-1 text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800 rounded transition cursor-pointer"
+                        >
+                          <TableIcon className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </>
                   )}
 
                   <button

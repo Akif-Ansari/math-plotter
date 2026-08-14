@@ -5,6 +5,7 @@ import Header from '@/components/Header';
 import ExpressionList from '@/components/ExpressionList';
 import GraphCanvas from '@/components/GraphCanvas';
 import AnalysisModal from '@/components/AnalysisModal';
+import TableModal from '@/components/TableModal';
 import Footer from '@/components/Footer';
 import { MathExpression, Viewport, AnalysisResult } from '@/types/math';
 
@@ -36,6 +37,8 @@ export default function Home() {
   const [isDarkTheme, setIsDarkTheme] = useState<boolean>(true);
   const [analyses, setAnalyses] = useState<Record<string, AnalysisResult>>({});
   const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(null);
+  const [isTableOpen, setIsTableOpen] = useState<boolean>(false);
+  const [tableExpressionId, setTableExpressionId] = useState<string | null>(null);
 
   // Memoized analysis update to prevent React render loops
   const handleAnalysisUpdate = useCallback((newAnalyses: Record<string, AnalysisResult>) => {
@@ -228,6 +231,10 @@ export default function Home() {
         onExportImage={handleExportImage}
         isDarkTheme={isDarkTheme}
         onToggleTheme={() => setIsDarkTheme((prev) => !prev)}
+        onOpenTable={() => {
+          setTableExpressionId(null);
+          setIsTableOpen(true);
+        }}
       />
 
       {/* Main Graphing Interface */}
@@ -240,6 +247,10 @@ export default function Home() {
           onDeleteExpression={handleDeleteExpression}
           onDuplicateExpression={handleDuplicateExpression}
           onOpenAnalysis={(id) => setSelectedAnalysisId(id)}
+          onOpenTable={(id) => {
+            setTableExpressionId(id || null);
+            setIsTableOpen(true);
+          }}
           analyses={analyses}
         />
 
@@ -259,6 +270,16 @@ export default function Home() {
           analysis={selectedAnalysis}
           expressionColor={selectedExpression?.color}
           onClose={() => setSelectedAnalysisId(null)}
+        />
+      )}
+
+      {/* Interactive Table of Values Modal */}
+      {isTableOpen && (
+        <TableModal
+          expressions={expressions}
+          initialExpressionId={tableExpressionId}
+          viewport={viewport}
+          onClose={() => setIsTableOpen(false)}
         />
       )}
 

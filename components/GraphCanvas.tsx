@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { MathExpression, Viewport, SnapPoint, AnalysisResult } from '@/types/math';
+import { MathExpression, Viewport, SnapPoint, AnalysisResult, TangentInfo } from '@/types/math';
 import { compileExpression, compile2DExpression, isImplicitEquation } from '@/lib/math-engine/parser';
 import { analyzeFunction, findIntersections } from '@/lib/math-engine/analysis';
-import { ZoomIn, ZoomOut, Maximize2, Move } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize2, Move, Compass } from 'lucide-react';
 
 interface GraphCanvasProps {
   expressions: MathExpression[];
@@ -46,6 +46,10 @@ export default function GraphCanvas({
   } | null>(null);
 
   const [snapPoints, setSnapPoints] = useState<SnapPoint[]>([]);
+
+  // Tangent Explorer state
+  const [isTangentMode, setIsTangentMode] = useState<boolean>(false);
+  const [tangentInfo, setTangentInfo] = useState<TangentInfo | null>(null);
 
   // Calculate snap points (Roots, Intercepts, Extrema, Asymptotes, Intersections)
   const computeAllSnapPoints = useCallback(() => {
@@ -558,8 +562,58 @@ export default function GraphCanvas({
       ctx.restore();
     }
 
+    // 5. Draw Tangent Line & Tangency Point Marker
+    if (isTangentMode && tangentInfo) {
+      ctx.save();
+      const tColor = tangentInfo.expressionColor || '#F59E0B';
+      ctx.strokeStyle = tColor;
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([8, 5]);
+
+      const m = tangentInfo.slope;
+      const c = tangentInfo.y - m * tangentInfo.x;
+
+      const x1 = viewport.xMin;
+      const y1 = m * x1 + c;
+      const x2 = viewport.xMax;
+      const y2 = m * x2 + c;
+
+      const sx1 = toScreenX(x1);
+      const sy1 = toScreenY(y1);
+      const sx2 = toScreenX(x2);
+      const sy2 = toScreenY(y2);
+
+      ctx.beginPath();
+      ctx.moveTo(sx1, sy1);
+      ctx.lineTo(sx2, sy2);
+      ctx.stroke();
+
+      // Point of Tangency
+      const tangSx = toScreenX(tangentInfo.x);
+      const tangSy = toScreenY(tangentInfo.y);
+
+      if (tangSx >= -50 && tangSx <= width + 50 && tangSy >= -50 && tangSy <= height + 50) {
+        ctx.fillStyle = tColor;
+        ctx.globalAlpha = 0.35;
+        ctx.beginPath();
+        ctx.arc(tangSx, tangSy, 12, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.globalAlpha = 1.0;
+        ctx.fillStyle = '#FFFFFF';
+        ctx.strokeStyle = tColor;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(tangSx, tangSy, 5.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
     ctx.restore();
-  }, [viewport, expressions, snapPoints, hoverInfo, isDarkTheme]);
+  }, [viewport, expressions, snapPoints, hoverInfo, isDarkTheme, isTangentMode, tangentInfo]);
 
   useEffect(() => {
     renderCanvas();
@@ -608,6 +662,43 @@ export default function GraphCanvas({
         yMax: yMax + shiftY,
       });
       return;
+    }
+
+    // Compute Tangent Info if Tangent Explorer is active
+    if (isTangentMode) {
+      const activeCartesian = expressions.find((e) => e.visible && e.type === 'cartesian');
+      if (activeCartesian) {
+        const { evalFn } = compileExpression(activeCartesian.rawText, 'x');
+        if (evalFn) {
+          const yVal = evalFn(mathX);
+          if (Number.isFinite(yVal) && !isNaN(yVal)) {
+            const h = 0.0001;
+            const y1 = evalFn(mathX - h);
+            const y2 = evalFn(mathX + h);
+            if (Number.isFinite(y1) && Number.isFinite(y2)) {
+              const slope = (y2 - y1) / (2 * h);
+              const c = yVal - slope * mathX;
+              const angleDeg = (Math.atan(slope) * 180) / Math.PI;
+
+              const mStr = slope.toFixed(3);
+              const cAbsStr = Math.abs(c).toFixed(3);
+              const signStr = c >= 0 ? '+' : '-';
+              const eqStr = `y = ${mStr}x ${signStr} ${cAbsStr}`;
+
+              setTangentInfo({
+                expressionId: activeCartesian.id,
+                expressionColor: activeCartesian.color,
+                rawText: activeCartesian.rawText,
+                x: Number(mathX.toFixed(3)),
+                y: Number(yVal.toFixed(3)),
+                slope: Number(slope.toFixed(3)),
+                equation: eqStr,
+                angleDegrees: Number(angleDeg.toFixed(1)),
+              });
+            }
+          }
+        }
+      }
     }
 
     const nearbySnap = snapPoints.find((pt) => {
@@ -839,6 +930,45 @@ export default function GraphCanvas({
         style={{ touchAction: 'none' }}
       />
 
+      {/* Tangent Explorer Floating HUD Card */}
+      {isTangentMode && tangentInfo && (
+        <div className="absolute top-4 left-4 z-20 bg-zinc-900/95 backdrop-blur-md border border-amber-500/40 text-zinc-100 p-4 rounded-xl shadow-2xl font-mono text-xs max-w-xs space-y-2.5 animate-in fade-in duration-150">
+          <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
+            <div className="flex items-center gap-2 font-bold text-amber-400">
+              <Compass className="w-4 h-4 text-amber-400" />
+              <span>Tangent & Derivative</span>
+            </div>
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+          </div>
+          <div className="space-y-1.5 text-zinc-300 text-[11px]">
+            <div className="flex justify-between">
+              <span className="text-zinc-500">Function:</span>
+              <span className="font-semibold" style={{ color: tangentInfo.expressionColor }}>
+                y = {tangentInfo.rawText}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-zinc-500">Point (a, f(a)):</span>
+              <span className="font-semibold text-zinc-100">
+                ({tangentInfo.x}, {tangentInfo.y})
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-zinc-500">Slope f'(a):</span>
+              <span className="font-bold text-emerald-400">{tangentInfo.slope}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-zinc-500">Tangent Line:</span>
+              <span className="font-semibold text-amber-300">{tangentInfo.equation}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-zinc-500">Angle θ:</span>
+              <span className="text-indigo-300">{tangentInfo.angleDegrees}°</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Floating Viewport Coordinates & Hover Tooltip */}
       {hoverInfo && (
         <div
@@ -863,6 +993,20 @@ export default function GraphCanvas({
 
       {/* On-Canvas Zoom & Navigation Toolbar */}
       <div className="absolute bottom-6 right-6 flex flex-col gap-2 z-10">
+        <button
+          onClick={() => {
+            setIsTangentMode((prev) => !prev);
+            if (isTangentMode) setTangentInfo(null);
+          }}
+          title={isTangentMode ? 'Disable Tangent Explorer' : 'Enable Tangent Explorer'}
+          className={`p-2.5 rounded-xl border shadow-lg backdrop-blur-md transition cursor-pointer ${
+            isTangentMode
+              ? 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-amber-500/10'
+              : 'bg-zinc-900/90 hover:bg-zinc-800 border-zinc-700/80 text-zinc-200 hover:text-white'
+          }`}
+        >
+          <Compass className="w-4 h-4" />
+        </button>
         <button
           onClick={() => applyZoom(0.8)}
           title="Zoom In"

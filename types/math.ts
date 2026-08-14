@@ -59,3 +59,14 @@ export interface Viewport {
   yMin: number;
   yMax: number;
 }
+
+export interface TangentInfo {
+  expressionId: string;
+  expressionColor: string;
+  rawText: string;
+  x: number;
+  y: number;
+  slope: number;
+  equation: string;
+  angleDegrees: number;
+}
