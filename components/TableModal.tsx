@@ -126,29 +126,29 @@ export default function TableModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-2 sm:p-4 animate-in fade-in duration-200">
       <div className="bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/50">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
-              <TableIcon className="w-5 h-5" />
+        <div className="px-4 py-3 sm:px-6 sm:py-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/50">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="p-1.5 sm:p-2 rounded-xl bg-[#006241]/20 border border-[#1DB954]/30 text-[#1DB954] flex-shrink-0">
+              <TableIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <h2 className="text-lg font-bold text-zinc-100">Table of Values</h2>
-              <p className="text-xs text-zinc-400">Numerical data table for Cartesian expressions</p>
+            <div className="min-w-0">
+              <h2 className="text-base sm:text-lg font-bold text-zinc-100 truncate">Table of Values</h2>
+              <p className="text-[11px] sm:text-xs text-zinc-400 truncate">Numerical data table for Cartesian expressions</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800 transition"
+            className="p-1.5 sm:p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800 transition flex-shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Modal Controls */}
-        <div className="p-6 border-b border-zinc-800/80 bg-zinc-900 flex flex-wrap gap-4 items-center justify-between">
+        <div className="p-3.5 sm:p-6 border-b border-zinc-800/80 bg-zinc-900 flex flex-wrap gap-2.5 sm:gap-4 items-center justify-between">
           <div className="flex flex-wrap gap-4 items-center">
             {/* Function Select */}
             <div className="flex flex-col gap-1">
@@ -158,7 +158,7 @@ export default function TableModal({
               <select
                 value={selectedExprId}
                 onChange={(e) => setSelectedExprId(e.target.value)}
-                className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500"
+                className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-[#1DB954]"
               >
                 <option value="all">All Visible Cartesian Functions</option>
                 {visibleExprs.map((expr) => (
@@ -178,7 +178,7 @@ export default function TableModal({
                 type="number"
                 value={xMinVal}
                 onChange={(e) => setXMinVal(parseFloat(e.target.value) || -10)}
-                className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500"
+                className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-[#1DB954]"
               />
             </div>
 
@@ -191,7 +191,7 @@ export default function TableModal({
                 type="number"
                 value={xMaxVal}
                 onChange={(e) => setXMaxVal(parseFloat(e.target.value) || 10)}
-                className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500"
+                className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-[#1DB954]"
               />
             </div>
 
@@ -203,7 +203,7 @@ export default function TableModal({
               <select
                 value={stepVal}
                 onChange={(e) => setStepVal(parseFloat(e.target.value))}
-                className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500"
+                className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-[#1DB954]"
               >
                 <option value={0.1}>0.1</option>
                 <option value={0.25}>0.25</option>
@@ -220,12 +220,12 @@ export default function TableModal({
               onClick={handleCopyTSV}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-xs font-medium transition cursor-pointer"
             >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? <Check className="w-3.5 h-3.5 text-[#1DB954]" /> : <Copy className="w-3.5 h-3.5" />}
               {copied ? 'Copied!' : 'Copy Table'}
             </button>
             <button
               onClick={handleExportCSV}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition cursor-pointer shadow-md"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#1DB954] hover:bg-[#18a349] text-black text-xs font-semibold transition cursor-pointer shadow-md shadow-[#1DB954]/20"
             >
               <Download className="w-3.5 h-3.5" />
               Export CSV
@@ -234,7 +234,7 @@ export default function TableModal({
         </div>
 
         {/* Data Table */}
-        <div className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-auto p-4 sm:p-6">
           {targetExpressions.length === 0 ? (
             <div className="text-center py-12 text-zinc-500 text-sm">
               No visible Cartesian functions available to generate table.
@@ -271,7 +271,7 @@ export default function TableModal({
                               <span className="flex items-center gap-2">
                                 <span>{val}</span>
                                 {isRoot && (
-                                  <span className="px-1.5 py-0.5 text-[10px] font-sans font-semibold rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                  <span className="px-1.5 py-0.5 text-[10px] font-sans font-semibold rounded bg-[#006241]/20 text-[#1DB954] border border-[#1DB954]/30">
                                     Root
                                   </span>
                                 )}

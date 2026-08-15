@@ -3,7 +3,7 @@
 import React from 'react';
 import { MathExpression, IntegralConfig } from '@/types/math';
 import { compileExpression } from '@/lib/math-engine/parser';
-import { X, Layers, Activity, Check } from 'lucide-react';
+import { X, Activity, Check } from 'lucide-react';
 
 interface IntegralControlModalProps {
   expressions: MathExpression[];
@@ -94,29 +94,29 @@ export default function IntegralControlModal({
   }, [primaryExpr, secondaryExpr, config, parameters]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-2 sm:p-4 animate-in fade-in duration-200">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/50">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
-              <Activity className="w-5 h-5" />
+        <div className="px-4 py-3 sm:px-6 sm:py-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/50">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="p-1.5 sm:p-2 rounded-xl bg-[#006241]/20 border border-[#1DB954]/30 text-[#1DB954] flex-shrink-0">
+              <Activity className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <h2 className="text-lg font-bold text-zinc-100">Definite Integral & Riemann Sums</h2>
-              <p className="text-xs text-zinc-400">Visualize area under the curve & numerical integration</p>
+            <div className="min-w-0">
+              <h2 className="text-base sm:text-lg font-bold text-zinc-100 truncate">Definite Integral &amp; Riemann Sums</h2>
+              <p className="text-[11px] sm:text-xs text-zinc-400 truncate">Visualize area under the curve &amp; numerical integration</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800 transition"
+            className="p-1.5 sm:p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800 transition flex-shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Modal Content */}
-        <div className="p-6 space-y-6 overflow-y-auto">
+        <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto">
           {/* Master Enable Switch */}
           <div className="flex items-center justify-between p-4 bg-zinc-950/70 border border-zinc-800 rounded-xl">
             <div>
@@ -126,7 +126,7 @@ export default function IntegralControlModal({
             <button
               onClick={() => onChangeConfig({ ...config, enabled: !config.enabled })}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                config.enabled ? 'bg-purple-600' : 'bg-zinc-700'
+                config.enabled ? 'bg-[#1DB954]' : 'bg-zinc-700'
               }`}
             >
               <span
@@ -147,7 +147,7 @@ export default function IntegralControlModal({
               <select
                 value={config.expressionId}
                 onChange={(e) => onChangeConfig({ ...config, expressionId: e.target.value })}
-                className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-lg p-2.5 focus:outline-none focus:border-purple-500"
+                className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-lg p-2.5 focus:outline-none focus:border-[#1DB954]"
               >
                 {visibleCartesian.map((expr) => (
                   <option key={expr.id} value={expr.id}>
@@ -167,7 +167,7 @@ export default function IntegralControlModal({
                 onChange={(e) =>
                   onChangeConfig({ ...config, expressionId2: e.target.value || null })
                 }
-                className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-lg p-2.5 focus:outline-none focus:border-purple-500"
+                className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-lg p-2.5 focus:outline-none focus:border-[#1DB954]"
               >
                 <option value="">None (Integrate relative to X-Axis)</option>
                 {visibleCartesian
@@ -192,7 +192,7 @@ export default function IntegralControlModal({
                 step="0.5"
                 value={config.a}
                 onChange={(e) => onChangeConfig({ ...config, a: parseFloat(e.target.value) || 0 })}
-                className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-lg p-2.5 focus:outline-none focus:border-purple-500 font-mono"
+                className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-lg p-2.5 focus:outline-none focus:border-[#1DB954] font-mono"
               />
             </div>
             <div>
@@ -204,7 +204,7 @@ export default function IntegralControlModal({
                 step="0.5"
                 value={config.b}
                 onChange={(e) => onChangeConfig({ ...config, b: parseFloat(e.target.value) || 0 })}
-                className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-lg p-2.5 focus:outline-none focus:border-purple-500 font-mono"
+                className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-lg p-2.5 focus:outline-none focus:border-[#1DB954] font-mono"
               />
             </div>
           </div>
@@ -212,7 +212,7 @@ export default function IntegralControlModal({
           {/* Riemann Sum Method Selector */}
           <div>
             <label className="text-xs font-medium text-zinc-300 block mb-2">
-              Integration & Approximation Method
+              Integration &amp; Approximation Method
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
               {[
@@ -227,7 +227,7 @@ export default function IntegralControlModal({
                   onClick={() => onChangeConfig({ ...config, method: item.id as IntegralConfig['method'] })}
                   className={`p-2.5 rounded-lg text-xs font-medium border transition ${
                     config.method === item.id
-                      ? 'bg-purple-600 border-purple-500 text-white shadow-md'
+                      ? 'bg-[#006241] border-[#1DB954] text-white shadow-md'
                       : 'bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-700'
                   }`}
                 >
@@ -242,7 +242,7 @@ export default function IntegralControlModal({
             <div>
               <div className="flex justify-between items-center mb-1.5 text-xs">
                 <span className="font-medium text-zinc-300">Subintervals (N)</span>
-                <span className="font-mono text-purple-400 font-bold">{config.n} rectangles</span>
+                <span className="font-mono text-[#1DB954] font-bold">{config.n} rectangles</span>
               </div>
               <input
                 type="range"
@@ -251,26 +251,26 @@ export default function IntegralControlModal({
                 step="1"
                 value={config.n}
                 onChange={(e) => onChangeConfig({ ...config, n: parseInt(e.target.value) || 10 })}
-                className="w-full accent-purple-500 cursor-pointer"
+                className="w-full accent-[#1DB954] cursor-pointer"
               />
             </div>
           )}
 
           {/* Live Calculation Results Card */}
-          <div className="p-4 bg-purple-950/30 border border-purple-800/50 rounded-xl space-y-2 font-mono text-xs">
-            <div className="flex justify-between items-center text-purple-200">
+          <div className="p-4 bg-[#006241]/20 border border-[#1DB954]/30 rounded-xl space-y-2 font-mono text-xs">
+            <div className="flex justify-between items-center text-[#1DB954]">
               <span className="text-zinc-400">Definite Integral ∫ₐᵇ f(x) dx:</span>
-              <span className="text-base font-bold text-purple-300">{integrationData.exact}</span>
+              <span className="text-base font-bold text-[#1DB954]">{integrationData.exact}</span>
             </div>
             {config.method !== 'exact' && (
               <>
                 <div className="flex justify-between items-center text-zinc-300">
                   <span className="text-zinc-400">Riemann Sum Approximation ({config.method}):</span>
-                  <span className="font-bold text-amber-300">{integrationData.approx}</span>
+                  <span className="font-bold text-[#1DB954]">{integrationData.approx}</span>
                 </div>
                 <div className="flex justify-between items-center text-zinc-400">
                   <span>Approximation Error |S_N - Exact|:</span>
-                  <span className="text-rose-400 font-semibold">{integrationData.error}</span>
+                  <span className="text-[#1DB954] font-semibold">{integrationData.error}</span>
                 </div>
               </>
             )}
@@ -281,10 +281,10 @@ export default function IntegralControlModal({
         <div className="px-6 py-4 border-t border-zinc-800 flex justify-end bg-zinc-950/50">
           <button
             onClick={onClose}
-            className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-semibold transition cursor-pointer shadow-md"
+            className="flex items-center gap-1.5 px-4 py-2 bg-[#1DB954] hover:bg-[#18a349] text-black rounded-lg text-xs font-semibold transition cursor-pointer shadow-md shadow-[#1DB954]/20"
           >
             <Check className="w-4 h-4" />
-            Apply & Close
+            Apply &amp; Close
           </button>
         </div>
       </div>

@@ -128,7 +128,7 @@ export default function GraphCanvas({
               y: pt.y,
               label: `Intersection: (${pt.x}, ${pt.y})`,
               type: 'intersection',
-              color: '#F59E0B',
+              color: '#1DB954',
             });
           });
         }
@@ -528,10 +528,10 @@ export default function GraphCanvas({
       if (sx >= 0 && sx <= width && sy >= 0 && sy <= height) {
         ctx.save();
 
-        let dotColor = pt.color || '#3B82F6';
-        if (pt.type === 'root') dotColor = '#10B981';
-        if (pt.type === 'extrema') dotColor = '#8B5CF6';
-        if (pt.type === 'intersection') dotColor = '#F59E0B';
+        let dotColor = pt.color || '#1DB954';
+        if (pt.type === 'root') dotColor = '#1DB954';
+        if (pt.type === 'extrema') dotColor = '#006241';
+        if (pt.type === 'intersection') dotColor = '#1DB954';
 
         ctx.fillStyle = dotColor;
         ctx.globalAlpha = 0.3;
@@ -571,7 +571,7 @@ export default function GraphCanvas({
       if (snapPoint) {
         const spSx = toScreenX(snapPoint.x);
         const spSy = toScreenY(snapPoint.y);
-        ctx.fillStyle = '#EF4444';
+        ctx.fillStyle = '#1DB954';
         ctx.beginPath();
         ctx.arc(spSx, spSy, 7, 0, Math.PI * 2);
         ctx.fill();
@@ -1076,13 +1076,13 @@ export default function GraphCanvas({
 
       {/* Tangent Explorer Floating HUD Card */}
       {isTangentMode && tangentInfo && (
-        <div className="absolute top-4 left-4 z-20 bg-zinc-900/95 backdrop-blur-md border border-amber-500/40 text-zinc-100 p-4 rounded-xl shadow-2xl font-mono text-xs max-w-xs space-y-2.5 animate-in fade-in duration-150">
-          <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
-            <div className="flex items-center gap-2 font-bold text-amber-400">
-              <Compass className="w-4 h-4 text-amber-400" />
-              <span>Tangent & Derivative</span>
+        <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-20 bg-zinc-900/95 backdrop-blur-md border border-[#1DB954]/40 text-zinc-100 p-3 sm:p-4 rounded-xl shadow-2xl font-mono text-xs max-w-[calc(100vw-2rem)] sm:max-w-xs space-y-2 sm:space-y-2.5 animate-in fade-in duration-150">
+          <div className="flex items-center justify-between border-b border-zinc-800 pb-1.5 sm:pb-2">
+            <div className="flex items-center gap-2 font-bold text-[#1DB954]">
+              <Compass className="w-4 h-4 text-[#1DB954]" />
+              <span>Tangent &amp; Derivative</span>
             </div>
-            <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+            <span className="w-2 h-2 rounded-full bg-[#1DB954] animate-ping" />
           </div>
           <div className="space-y-1.5 text-zinc-300 text-[11px]">
             <div className="flex justify-between">
@@ -1099,15 +1099,15 @@ export default function GraphCanvas({
             </div>
             <div className="flex justify-between">
               <span className="text-zinc-500">Slope f'(a):</span>
-              <span className="font-bold text-emerald-400">{tangentInfo.slope}</span>
+              <span className="font-bold text-[#1DB954]">{tangentInfo.slope}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-zinc-500">Tangent Line:</span>
-              <span className="font-semibold text-amber-300">{tangentInfo.equation}</span>
+              <span className="font-semibold text-[#1DB954]">{tangentInfo.equation}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-zinc-500">Angle θ:</span>
-              <span className="text-indigo-300">{tangentInfo.angleDegrees}°</span>
+              <span className="text-[#1DB954]">{tangentInfo.angleDegrees}°</span>
             </div>
           </div>
         </div>
@@ -1123,8 +1123,8 @@ export default function GraphCanvas({
           }}
         >
           {hoverInfo.snapPoint ? (
-            <div className="flex items-center gap-1.5 font-semibold text-emerald-400">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <div className="flex items-center gap-1.5 font-semibold text-[#1DB954]">
+              <span className="w-2 h-2 rounded-full bg-[#1DB954] animate-pulse" />
               {hoverInfo.snapPoint.label}
             </div>
           ) : (
@@ -1136,15 +1136,16 @@ export default function GraphCanvas({
       )}
 
       {/* On-Canvas Zoom & Navigation Toolbar */}
-      <div className="absolute bottom-6 right-6 flex flex-col gap-2 z-10">
+      <div className="absolute bottom-4 right-3 sm:bottom-6 sm:right-6 flex flex-col gap-1.5 sm:gap-2 z-10">
         {onOpenIntegralModal && (
           <button
             onClick={onOpenIntegralModal}
             title="Configure Definite Integral & Riemann Sums"
-            className={`p-2.5 rounded-xl border shadow-lg backdrop-blur-md transition cursor-pointer ${integralConfig?.enabled
-                ? 'bg-purple-500/20 border-purple-500 text-purple-400 shadow-purple-500/10'
+            className={`p-2 sm:p-2.5 rounded-lg sm:rounded-xl border shadow-lg backdrop-blur-md transition cursor-pointer ${
+              integralConfig?.enabled
+                ? 'bg-[#006241]/30 border-[#1DB954] text-[#1DB954] shadow-[#1DB954]/10'
                 : 'bg-zinc-900/90 hover:bg-zinc-800 border-zinc-700/80 text-zinc-200 hover:text-white'
-              }`}
+            }`}
           >
             <Sigma className="w-4 h-4" />
           </button>
@@ -1155,24 +1156,25 @@ export default function GraphCanvas({
             if (isTangentMode) setTangentInfo(null);
           }}
           title={isTangentMode ? 'Disable Tangent Explorer' : 'Enable Tangent Explorer'}
-          className={`p-2.5 rounded-xl border shadow-lg backdrop-blur-md transition cursor-pointer ${isTangentMode
-              ? 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-amber-500/10'
+          className={`p-2 sm:p-2.5 rounded-lg sm:rounded-xl border shadow-lg backdrop-blur-md transition cursor-pointer ${
+            isTangentMode
+              ? 'bg-[#006241]/30 border-[#1DB954] text-[#1DB954] shadow-[#1DB954]/10'
               : 'bg-zinc-900/90 hover:bg-zinc-800 border-zinc-700/80 text-zinc-200 hover:text-white'
-            }`}
+          }`}
         >
           <Compass className="w-4 h-4" />
         </button>
         <button
           onClick={() => applyZoom(0.8)}
           title="Zoom In"
-          className="p-2.5 bg-zinc-900/90 hover:bg-zinc-800 text-zinc-200 hover:text-white rounded-xl border border-zinc-700/80 shadow-lg backdrop-blur-md transition cursor-pointer"
+          className="p-2 sm:p-2.5 bg-zinc-900/90 hover:bg-zinc-800 text-zinc-200 hover:text-white rounded-lg sm:rounded-xl border border-zinc-700/80 shadow-lg backdrop-blur-md transition cursor-pointer"
         >
           <ZoomIn className="w-4 h-4" />
         </button>
         <button
           onClick={() => applyZoom(1.25)}
           title="Zoom Out"
-          className="p-2.5 bg-zinc-900/90 hover:bg-zinc-800 text-zinc-200 hover:text-white rounded-xl border border-zinc-700/80 shadow-lg backdrop-blur-md transition cursor-pointer"
+          className="p-2 sm:p-2.5 bg-zinc-900/90 hover:bg-zinc-800 text-zinc-200 hover:text-white rounded-lg sm:rounded-xl border border-zinc-700/80 shadow-lg backdrop-blur-md transition cursor-pointer"
         >
           <ZoomOut className="w-4 h-4" />
         </button>
@@ -1186,16 +1188,16 @@ export default function GraphCanvas({
             })
           }
           title="Reset Zoom Scale"
-          className="p-2.5 bg-zinc-900/90 hover:bg-zinc-800 text-zinc-200 hover:text-white rounded-xl border border-zinc-700/80 shadow-lg backdrop-blur-md transition cursor-pointer"
+          className="p-2 sm:p-2.5 bg-zinc-900/90 hover:bg-zinc-800 text-zinc-200 hover:text-white rounded-lg sm:rounded-xl border border-zinc-700/80 shadow-lg backdrop-blur-md transition cursor-pointer"
         >
           <Maximize2 className="w-4 h-4" />
         </button>
       </div>
 
       {/* Axis Helper Indicator */}
-      <div className="absolute top-4 right-6 bg-zinc-900/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-zinc-800 text-[11px] font-mono text-zinc-400 flex items-center gap-3">
-        <span className="flex items-center gap-1">
-          <Move className="w-3 h-3 text-indigo-400" /> Pan / Scroll to Zoom
+      <div className="absolute top-3 right-3 sm:top-4 sm:right-6 bg-zinc-900/80 backdrop-blur-md px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg border border-zinc-800 text-[10px] sm:text-[11px] font-mono text-zinc-400 flex items-center gap-2 sm:gap-3">
+        <span className="hidden md:flex items-center gap-1">
+          <Move className="w-3 h-3 text-[#1DB954]" /> Pan / Scroll to Zoom
         </span>
         <span>
           X: [{viewport.xMin.toFixed(1)}, {viewport.xMax.toFixed(1)}]

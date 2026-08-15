@@ -47,10 +47,10 @@ export default function ParameterSlidersBar({
   if (detectedParams.length === 0) return null;
 
   return (
-    <div className="absolute bottom-6 left-6 z-20 bg-zinc-900/95 backdrop-blur-md border border-indigo-500/40 text-zinc-100 p-4 rounded-2xl shadow-2xl font-mono text-xs w-80 space-y-3 animate-in fade-in duration-200">
+    <div className="absolute bottom-4 left-3 sm:bottom-6 sm:left-6 z-20 bg-zinc-900/95 backdrop-blur-md border border-[#1DB954]/40 text-zinc-100 p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-2xl font-mono text-xs w-[calc(100vw-1.5rem)] sm:w-80 max-w-sm space-y-2.5 sm:space-y-3 animate-in fade-in duration-200">
       {/* Header & Animation Control */}
       <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
-        <div className="flex items-center gap-2 font-bold text-indigo-400">
+        <div className="flex items-center gap-2 font-bold text-[#1DB954]">
           <Sliders className="w-4 h-4" />
           <span>Dynamic Parameters</span>
         </div>
@@ -58,8 +58,8 @@ export default function ParameterSlidersBar({
           onClick={() => setIsPlaying((prev) => !prev)}
           className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-sans font-semibold transition cursor-pointer ${
             isPlaying
-              ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse'
-              : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md'
+              ? 'bg-[#006241]/30 text-[#1DB954] border border-[#1DB954]/40 animate-pulse'
+              : 'bg-[#1DB954] hover:bg-[#18a349] text-black shadow-md shadow-[#1DB954]/20'
           }`}
         >
           {isPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
@@ -74,7 +74,7 @@ export default function ParameterSlidersBar({
           return (
             <div key={param} className="space-y-1 bg-zinc-950/50 p-2.5 rounded-xl border border-zinc-800">
               <div className="flex justify-between items-center text-[11px]">
-                <span className="font-bold text-indigo-300">{param} =</span>
+                <span className="font-bold text-[#1DB954]">{param} =</span>
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-white bg-zinc-800 px-2 py-0.5 rounded border border-zinc-700">
                     {val}
@@ -95,7 +95,7 @@ export default function ParameterSlidersBar({
                 step="0.1"
                 value={val}
                 onChange={(e) => onChangeParameter(param, parseFloat(e.target.value))}
-                className="w-full accent-indigo-500 cursor-pointer h-1.5 bg-zinc-800 rounded-lg"
+                className="w-full accent-[#1DB954] cursor-pointer h-1.5 bg-zinc-800 rounded-lg"
               />
             </div>
           );
