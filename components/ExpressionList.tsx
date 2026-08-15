@@ -32,8 +32,18 @@ interface ExpressionListProps {
 }
 
 const PRESET_COLORS = [
-  '#1DB954',
-  '#006241',
+  '#1DB954', // Electric Green
+  '#006241', // Forest Emerald
+  '#3B82F6', // Cobalt Blue
+  '#EF4444', // Crimson Red
+  '#8B5CF6', // Vivid Violet
+  '#F59E0B', // Amber Gold
+  '#EC4899', // Hot Pink
+  '#06B6D4', // Cyan Sky
+  '#F97316', // Sunset Orange
+  '#14B8A6', // Teal
+  '#6366F1', // Indigo
+  '#A855F7', // Magenta
 ];
 
 export default function ExpressionList({
@@ -381,20 +391,28 @@ export default function ExpressionList({
 
                   {/* Preset Swatches */}
                   <div>
-                    <label className={`text-[10px] font-medium block mb-1 ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                    <label className={`text-[10px] font-medium block mb-1.5 ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-600'}`}>
                       Color Palette
                     </label>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {PRESET_COLORS.map((c) => (
-                        <button
-                          key={c}
-                          onClick={() => onUpdateExpression(expr.id, { color: c })}
-                          className={`w-5 h-5 rounded-full transition transform hover:scale-125 ${
-                            expr.color === c ? 'ring-2 ring-[#1DB954] scale-110' : ''
-                          }`}
-                          style={{ backgroundColor: c }}
-                        />
-                      ))}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {PRESET_COLORS.map((c) => {
+                        const isSelected = expr.color.toLowerCase() === c.toLowerCase();
+                        return (
+                          <button
+                            key={c}
+                            onClick={() => onUpdateExpression(expr.id, { color: c })}
+                            title={`Select color ${c}`}
+                            className={`w-5 h-5 rounded-full transition transform hover:scale-125 cursor-pointer flex-shrink-0 ${
+                              isSelected
+                                ? isDarkTheme
+                                  ? 'ring-2 ring-white ring-offset-1 ring-offset-zinc-900 scale-110'
+                                  : 'ring-2 ring-zinc-900 ring-offset-1 ring-offset-white scale-110'
+                                : 'opacity-85 hover:opacity-100'
+                            }`}
+                            style={{ backgroundColor: c }}
+                          />
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
