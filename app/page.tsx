@@ -268,7 +268,9 @@ export default function Home() {
 
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-zinc-950 font-sans overflow-hidden">
+    <div className={`flex flex-col h-screen w-screen font-sans overflow-hidden transition-colors duration-200 ${
+      isDarkTheme ? 'bg-zinc-950 text-white' : 'bg-slate-100 text-zinc-900'
+    }`}>
       {/* Top Navigation Bar */}
       <Header
         onResetView={() => setViewport(DEFAULT_VIEWPORT)}
@@ -302,6 +304,7 @@ export default function Home() {
             setIsIntegralOpen(true);
           }}
           analyses={analyses}
+          isDarkTheme={isDarkTheme}
         />
 
         {/* Right Pane: Interactive 60FPS Graph Canvas */}
@@ -322,6 +325,7 @@ export default function Home() {
           onChangeParameter={handleParameterChange}
           onResetParameter={handleParameterReset}
           detectedParams={detectedParams}
+          isDarkTheme={isDarkTheme}
         />
       </main>
 
@@ -331,6 +335,7 @@ export default function Home() {
           analysis={selectedAnalysis}
           expressionColor={selectedExpression?.color}
           onClose={() => setSelectedAnalysisId(null)}
+          isDarkTheme={isDarkTheme}
         />
       )}
 
@@ -341,6 +346,7 @@ export default function Home() {
           initialExpressionId={tableExpressionId}
           viewport={viewport}
           onClose={() => setIsTableOpen(false)}
+          isDarkTheme={isDarkTheme}
         />
       )}
 
@@ -352,11 +358,12 @@ export default function Home() {
           onChangeConfig={setIntegralConfig}
           onClose={() => setIsIntegralOpen(false)}
           parameters={parameters}
+          isDarkTheme={isDarkTheme}
         />
       )}
 
       {/* Bottom Corner Tech Stack Hints */}
-      <Footer />
+      <Footer isDarkTheme={isDarkTheme} />
     </div>
   );
 }

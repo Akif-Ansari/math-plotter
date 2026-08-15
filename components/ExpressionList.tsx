@@ -28,6 +28,7 @@ interface ExpressionListProps {
   onOpenTable?: (id?: string) => void;
   onOpenIntegral?: (id: string) => void;
   analyses: Record<string, AnalysisResult>;
+  isDarkTheme?: boolean;
 }
 
 const PRESET_COLORS = [
@@ -45,6 +46,7 @@ export default function ExpressionList({
   onOpenTable,
   onOpenIntegral,
   analyses,
+  isDarkTheme = true,
 }: ExpressionListProps) {
   const [activeInputId, setActiveInputId] = React.useState<string | null>(null);
   const [isCollapsed, setIsCollapsed] = React.useState<boolean>(false);
@@ -52,11 +54,17 @@ export default function ExpressionList({
 
   if (isCollapsed) {
     return (
-      <aside className="w-12 sm:w-14 bg-zinc-900 border-r border-zinc-800 text-white flex flex-col items-center py-3 sm:py-4 z-10 shadow-xl select-none flex-shrink-0">
+      <aside className={`w-12 sm:w-14 border-r flex flex-col items-center py-3 sm:py-4 z-10 shadow-xl select-none flex-shrink-0 transition-colors duration-200 ${
+        isDarkTheme ? 'bg-zinc-900 border-zinc-800 text-white' : 'bg-white border-zinc-200 text-zinc-900'
+      }`}>
         <button
           onClick={() => setIsCollapsed(false)}
           title="Expand Expression Panel"
-          className="p-1.5 sm:p-2 text-zinc-400 hover:text-white bg-zinc-800 hover:bg-zinc-750 rounded-lg border border-zinc-700 transition cursor-pointer mb-3 sm:mb-4"
+          className={`p-1.5 sm:p-2 rounded-lg border transition cursor-pointer mb-3 sm:mb-4 ${
+            isDarkTheme
+              ? 'text-zinc-400 hover:text-white bg-zinc-800 hover:bg-zinc-750 border-zinc-700'
+              : 'text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200 border-zinc-300'
+          }`}
         >
           <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
@@ -87,12 +95,18 @@ export default function ExpressionList({
   }
 
   return (
-    <aside className="w-full sm:w-80 md:w-96 bg-zinc-900 border-r border-zinc-800 text-white flex flex-col h-full z-10 shadow-xl select-none min-w-0 max-w-full overflow-hidden">
+    <aside className={`w-full sm:w-80 md:w-96 border-r flex flex-col h-full z-10 shadow-xl select-none min-w-0 max-w-full overflow-hidden transition-colors duration-200 ${
+      isDarkTheme ? 'bg-zinc-900 border-zinc-800 text-white' : 'bg-white border-zinc-200 text-zinc-900'
+    }`}>
       {/* Sidebar Header */}
-      <div className="p-2.5 sm:p-3.5 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/40 min-w-0">
+      <div className={`p-2.5 sm:p-3.5 border-b flex items-center justify-between min-w-0 ${
+        isDarkTheme ? 'bg-zinc-950/40 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
+      }`}>
         <div className="flex items-center gap-2">
           <Calculator className="w-4 h-4 text-[#1DB954]" />
-          <h2 className="font-semibold text-xs sm:text-sm text-zinc-200">Expressions</h2>
+          <h2 className={`font-semibold text-xs sm:text-sm ${isDarkTheme ? 'text-zinc-200' : 'text-zinc-800'}`}>
+            Expressions
+          </h2>
         </div>
 
         <div className="flex items-center gap-1 sm:gap-1.5">
@@ -107,7 +121,9 @@ export default function ExpressionList({
           <button
             onClick={() => setIsCollapsed(true)}
             title="Collapse Sidebar"
-            className="p-1 sm:p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition cursor-pointer"
+            className={`p-1 sm:p-1.5 rounded-lg transition cursor-pointer ${
+              isDarkTheme ? 'text-zinc-400 hover:text-white hover:bg-zinc-800' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
+            }`}
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -139,8 +155,12 @@ export default function ExpressionList({
               key={expr.id}
               className={`p-2.5 sm:p-3 rounded-xl border transition-all min-w-0 overflow-hidden ${
                 activeInputId === expr.id
-                  ? 'border-[#1DB954]/80 bg-zinc-800/80 shadow-lg shadow-[#1DB954]/10'
-                  : 'border-zinc-800 bg-zinc-950/60 hover:border-zinc-700'
+                  ? isDarkTheme
+                    ? 'border-[#1DB954]/80 bg-zinc-800/80 shadow-lg shadow-[#1DB954]/10'
+                    : 'border-[#1DB954]/80 bg-zinc-50 shadow-md shadow-[#1DB954]/10'
+                  : isDarkTheme
+                    ? 'border-zinc-800 bg-zinc-950/60 hover:border-zinc-700'
+                    : 'border-zinc-200 bg-white hover:border-zinc-300 shadow-sm'
               }`}
             >
               {/* Top Control Bar - Fully Responsive with flex-wrap and compact gaps */}
@@ -170,7 +190,11 @@ export default function ExpressionList({
                         type: e.target.value as MathFunctionType,
                       })
                     }
-                    className="bg-zinc-800 text-[10px] sm:text-[11px] font-mono text-zinc-300 px-1.5 sm:px-2 py-0.5 rounded border border-zinc-700 focus:outline-none focus:border-[#1DB954] max-w-[95px] sm:max-w-[120px] truncate"
+                    className={`text-[10px] sm:text-[11px] font-mono px-1.5 sm:px-2 py-0.5 rounded border focus:outline-none focus:border-[#1DB954] max-w-[95px] sm:max-w-[120px] truncate ${
+                      isDarkTheme
+                        ? 'bg-zinc-800 text-zinc-300 border-zinc-700'
+                        : 'bg-zinc-100 text-zinc-800 border-zinc-300'
+                    }`}
                   >
                     <option value="cartesian">y = f(x)</option>
                     <option value="implicit">Implicit</option>
@@ -179,7 +203,9 @@ export default function ExpressionList({
                     <option value="parametric">Parametric</option>
                   </select>
 
-                  <span className="text-[10px] font-mono text-zinc-500 bg-zinc-900/80 px-1 py-0.5 rounded border border-zinc-800 flex-shrink-0">
+                  <span className={`text-[10px] font-mono px-1 py-0.5 rounded border flex-shrink-0 ${
+                    isDarkTheme ? 'text-zinc-500 bg-zinc-900/80 border-zinc-800' : 'text-zinc-600 bg-zinc-100 border-zinc-200'
+                  }`}>
                     #{index + 1}
                   </span>
                 </div>
@@ -190,7 +216,11 @@ export default function ExpressionList({
                     onClick={() => setEditingSettingsId(isCustomizing ? null : expr.id)}
                     title="Customize Styling & Label"
                     className={`w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center rounded transition cursor-pointer ${
-                      isCustomizing ? 'text-[#1DB954] bg-[#006241]/30 border border-[#1DB954]/40' : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+                      isCustomizing
+                        ? 'text-[#1DB954] bg-[#006241]/30 border border-[#1DB954]/40'
+                        : isDarkTheme
+                          ? 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+                          : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
                     }`}
                   >
                     <Sliders className="w-3.5 h-3.5" />
@@ -201,7 +231,11 @@ export default function ExpressionList({
                       <button
                         onClick={() => onOpenAnalysis(expr.id)}
                         title="Calculus Analysis (Roots, Domain, Range, Asymptotes)"
-                        className="w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center text-zinc-400 hover:text-[#1DB954] hover:bg-zinc-800 rounded transition cursor-pointer"
+                        className={`w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center rounded transition cursor-pointer ${
+                          isDarkTheme
+                            ? 'text-zinc-400 hover:text-[#1DB954] hover:bg-zinc-800'
+                            : 'text-zinc-500 hover:text-[#1DB954] hover:bg-zinc-100'
+                        }`}
                       >
                         <BarChart2 className="w-3.5 h-3.5" />
                       </button>
@@ -209,7 +243,11 @@ export default function ExpressionList({
                         <button
                           onClick={() => onOpenTable(expr.id)}
                           title="Table of Values (x vs f(x))"
-                          className="w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center text-zinc-400 hover:text-[#1DB954] hover:bg-zinc-800 rounded transition cursor-pointer"
+                          className={`w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center rounded transition cursor-pointer ${
+                            isDarkTheme
+                              ? 'text-zinc-400 hover:text-[#1DB954] hover:bg-zinc-800'
+                              : 'text-zinc-500 hover:text-[#1DB954] hover:bg-zinc-100'
+                          }`}
                         >
                           <TableIcon className="w-3.5 h-3.5" />
                         </button>
@@ -218,7 +256,11 @@ export default function ExpressionList({
                         <button
                           onClick={() => onOpenIntegral(expr.id)}
                           title="Definite Integral & Riemann Sums"
-                          className="w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center text-zinc-400 hover:text-[#1DB954] hover:bg-zinc-800 rounded transition cursor-pointer"
+                          className={`w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center rounded transition cursor-pointer ${
+                            isDarkTheme
+                              ? 'text-zinc-400 hover:text-[#1DB954] hover:bg-zinc-800'
+                              : 'text-zinc-500 hover:text-[#1DB954] hover:bg-zinc-100'
+                          }`}
                         >
                           <Sigma className="w-3.5 h-3.5" />
                         </button>
@@ -229,7 +271,11 @@ export default function ExpressionList({
                   <button
                     onClick={() => onDuplicateExpression(expr.id)}
                     title="Duplicate Expression"
-                    className="w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 rounded transition cursor-pointer"
+                    className={`w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center rounded transition cursor-pointer ${
+                      isDarkTheme
+                        ? 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+                        : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
+                    }`}
                   >
                     <Copy className="w-3.5 h-3.5" />
                   </button>
@@ -237,15 +283,23 @@ export default function ExpressionList({
                   <button
                     onClick={() => onUpdateExpression(expr.id, { visible: !expr.visible })}
                     title={expr.visible ? 'Hide Graph' : 'Show Graph'}
-                    className="w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 rounded transition cursor-pointer"
+                    className={`w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center rounded transition cursor-pointer ${
+                      isDarkTheme
+                        ? 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+                        : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
+                    }`}
                   >
-                    {expr.visible ? <Eye className="w-3.5 h-3.5 text-[#1DB954]" /> : <EyeOff className="w-3.5 h-3.5 text-zinc-600" />}
+                    {expr.visible ? <Eye className="w-3.5 h-3.5 text-[#1DB954]" /> : <EyeOff className="w-3.5 h-3.5 text-zinc-400" />}
                   </button>
 
                   <button
                     onClick={() => onDeleteExpression(expr.id)}
                     title="Delete Expression"
-                    className="w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center text-zinc-400 hover:text-[#1DB954] hover:bg-zinc-800 rounded transition cursor-pointer"
+                    className={`w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center rounded transition cursor-pointer ${
+                      isDarkTheme
+                        ? 'text-zinc-400 hover:text-[#1DB954] hover:bg-zinc-800'
+                        : 'text-zinc-500 hover:text-[#1DB954] hover:bg-zinc-100'
+                    }`}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -254,23 +308,33 @@ export default function ExpressionList({
 
               {/* Custom Settings Panel - Mobile Responsive Grid & Compact Padding */}
               {isCustomizing && (
-                <div className="mb-2.5 p-2 sm:p-2.5 bg-zinc-900/90 border border-zinc-800 rounded-lg space-y-2 text-xs min-w-0">
+                <div className={`mb-2.5 p-2 sm:p-2.5 rounded-lg space-y-2 text-xs min-w-0 border ${
+                  isDarkTheme ? 'bg-zinc-900/90 border-zinc-800 text-zinc-200' : 'bg-zinc-50 border-zinc-200 text-zinc-800'
+                }`}>
                   {/* Label */}
                   <div>
-                    <label className="text-[10px] text-zinc-400 font-medium block mb-1">Custom Label/Name</label>
+                    <label className={`text-[10px] font-medium block mb-1 ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                      Custom Label/Name
+                    </label>
                     <input
                       type="text"
                       value={expr.label || ''}
                       onChange={(e) => onUpdateExpression(expr.id, { label: e.target.value })}
                       placeholder="e.g. Parabola / Conic"
-                      className="w-full bg-zinc-950 border border-zinc-700/80 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-[#1DB954]"
+                      className={`w-full rounded px-2 py-1 text-xs focus:outline-none focus:border-[#1DB954] border ${
+                        isDarkTheme
+                          ? 'bg-zinc-950 border-zinc-700/80 text-white'
+                          : 'bg-white border-zinc-300 text-zinc-900'
+                      }`}
                     />
                   </div>
 
                   {/* Line Style & Thickness */}
                   <div className="grid grid-cols-2 gap-2 min-w-0">
                     <div className="min-w-0">
-                      <label className="text-[10px] text-zinc-400 font-medium block mb-1">Line Style</label>
+                      <label className={`text-[10px] font-medium block mb-1 ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                        Line Style
+                      </label>
                       <select
                         value={expr.lineStyle || 'solid'}
                         onChange={(e) =>
@@ -278,7 +342,11 @@ export default function ExpressionList({
                             lineStyle: e.target.value as LineStyleType,
                           })
                         }
-                        className="w-full bg-zinc-950 text-zinc-300 text-[11px] px-1.5 py-1 rounded border border-zinc-700/80 focus:outline-none focus:border-[#1DB954] truncate"
+                        className={`w-full text-[11px] px-1.5 py-1 rounded border focus:outline-none focus:border-[#1DB954] truncate ${
+                          isDarkTheme
+                            ? 'bg-zinc-950 text-zinc-300 border-zinc-700/80'
+                            : 'bg-white text-zinc-800 border-zinc-300'
+                        }`}
                       >
                         <option value="solid">Solid (━)</option>
                         <option value="dashed">Dashed (╌)</option>
@@ -287,7 +355,9 @@ export default function ExpressionList({
                     </div>
 
                     <div className="min-w-0">
-                      <label className="text-[10px] text-zinc-400 font-medium block mb-1">Thickness</label>
+                      <label className={`text-[10px] font-medium block mb-1 ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                        Thickness
+                      </label>
                       <select
                         value={expr.lineWidth || 2.5}
                         onChange={(e) =>
@@ -295,7 +365,11 @@ export default function ExpressionList({
                             lineWidth: parseFloat(e.target.value),
                           })
                         }
-                        className="w-full bg-zinc-950 text-zinc-300 text-[11px] px-1.5 py-1 rounded border border-zinc-700/80 focus:outline-none focus:border-[#1DB954] truncate"
+                        className={`w-full text-[11px] px-1.5 py-1 rounded border focus:outline-none focus:border-[#1DB954] truncate ${
+                          isDarkTheme
+                            ? 'bg-zinc-950 text-zinc-300 border-zinc-700/80'
+                            : 'bg-white text-zinc-800 border-zinc-300'
+                        }`}
                       >
                         <option value={1.5}>Thin (1.5px)</option>
                         <option value={2.5}>Normal (2.5px)</option>
@@ -307,14 +381,16 @@ export default function ExpressionList({
 
                   {/* Preset Swatches */}
                   <div>
-                    <label className="text-[10px] text-zinc-400 font-medium block mb-1">Color Palette</label>
+                    <label className={`text-[10px] font-medium block mb-1 ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                      Color Palette
+                    </label>
                     <div className="flex items-center gap-2 flex-wrap">
                       {PRESET_COLORS.map((c) => (
                         <button
                           key={c}
                           onClick={() => onUpdateExpression(expr.id, { color: c })}
                           className={`w-5 h-5 rounded-full transition transform hover:scale-125 ${
-                            expr.color === c ? 'ring-2 ring-white scale-110' : ''
+                            expr.color === c ? 'ring-2 ring-[#1DB954] scale-110' : ''
                           }`}
                           style={{ backgroundColor: c }}
                         />
@@ -328,32 +404,44 @@ export default function ExpressionList({
               {expr.type === 'parametric' ? (
                 <div className="space-y-1.5 min-w-0">
                   <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="text-xs font-mono text-zinc-400 flex-shrink-0">x(t) =</span>
+                    <span className={`text-xs font-mono flex-shrink-0 ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                      x(t) =
+                    </span>
                     <input
                       type="text"
                       value={expr.parametricX || ''}
                       onFocus={() => setActiveInputId(expr.id)}
                       onChange={(e) => onUpdateExpression(expr.id, { parametricX: e.target.value })}
                       placeholder="3 * cos(t)"
-                      className="min-w-0 flex-1 bg-zinc-900 border border-zinc-700/80 rounded px-2 py-1 text-xs text-white font-mono focus:outline-none focus:border-[#1DB954]"
+                      className={`min-w-0 flex-1 border rounded px-2 py-1 text-xs font-mono focus:outline-none focus:border-[#1DB954] ${
+                        isDarkTheme
+                          ? 'bg-zinc-900 border-zinc-700/80 text-white'
+                          : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                      }`}
                     />
                   </div>
                   <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="text-xs font-mono text-zinc-400 flex-shrink-0">y(t) =</span>
+                    <span className={`text-xs font-mono flex-shrink-0 ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                      y(t) =
+                    </span>
                     <input
                       type="text"
                       value={expr.parametricY || ''}
                       onFocus={() => setActiveInputId(expr.id)}
                       onChange={(e) => onUpdateExpression(expr.id, { parametricY: e.target.value })}
                       placeholder="3 * sin(t)"
-                      className="min-w-0 flex-1 bg-zinc-900 border border-zinc-700/80 rounded px-2 py-1 text-xs text-white font-mono focus:outline-none focus:border-[#1DB954]"
+                      className={`min-w-0 flex-1 border rounded px-2 py-1 text-xs font-mono focus:outline-none focus:border-[#1DB954] ${
+                        isDarkTheme
+                          ? 'bg-zinc-900 border-zinc-700/80 text-white'
+                          : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                      }`}
                     />
                   </div>
                 </div>
               ) : (
                 <div className="relative min-w-0">
                   <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="text-xs font-mono font-bold text-zinc-400 flex-shrink-0">
+                    <span className={`text-xs font-mono font-bold flex-shrink-0 ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-600'}`}>
                       {getPrefix()}
                     </span>
                     <input
@@ -370,7 +458,11 @@ export default function ExpressionList({
                               ? 'y^2'
                               : 'sqrt(x)'
                       }
-                      className="min-w-0 flex-1 bg-zinc-900 border border-zinc-700/80 rounded px-2 py-1 text-xs text-white font-mono focus:outline-none focus:border-[#1DB954]"
+                      className={`min-w-0 flex-1 border rounded px-2.5 py-1 text-xs font-mono focus:outline-none focus:border-[#1DB954] ${
+                        isDarkTheme
+                          ? 'bg-zinc-900 border-zinc-700/80 text-white'
+                          : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                      }`}
                     />
                   </div>
                 </div>
@@ -378,7 +470,9 @@ export default function ExpressionList({
 
               {/* LaTeX Render Preview & Quick Summary */}
               {expr.rawText && (
-                <div className="mt-2 pt-2 border-t border-zinc-800/80 flex items-center justify-between gap-2 text-xs min-w-0">
+                <div className={`mt-2 pt-2 border-t flex items-center justify-between gap-2 text-xs min-w-0 ${
+                  isDarkTheme ? 'border-zinc-800/80' : 'border-zinc-200'
+                }`}>
                   <div className="truncate min-w-0 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
                     {expr.label && (
                       <span className="text-[10px] text-[#1DB954] font-semibold uppercase flex-shrink-0">
@@ -387,7 +481,7 @@ export default function ExpressionList({
                     )}
                     <KaTeXRenderer
                       latex={getLatexString()}
-                      className="text-zinc-300 font-serif"
+                      className={`font-serif ${isDarkTheme ? 'text-zinc-300' : 'text-zinc-800'}`}
                     />
                   </div>
 

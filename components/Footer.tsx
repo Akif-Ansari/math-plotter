@@ -2,18 +2,24 @@
 
 import React from 'react';
 
-export default function Footer() {
+interface FooterProps {
+  isDarkTheme?: boolean;
+}
+
+export default function Footer({ isDarkTheme = true }: FooterProps) {
   return (
-    <footer className="hidden md:flex h-7 bg-zinc-950 border-t border-zinc-800/80 px-4 items-center justify-between text-[11px] text-zinc-500 font-mono select-none z-20">
+    <footer className={`hidden md:flex h-7 border-t px-4 items-center justify-between text-[11px] font-mono select-none z-20 transition-colors duration-200 ${
+      isDarkTheme ? 'bg-zinc-950 border-zinc-800/80 text-zinc-500' : 'bg-white border-zinc-200 text-zinc-600'
+    }`}>
       <div className="flex items-center gap-4">
         <span className="flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-[#1DB954]" />
-          <span>Math Engine: <strong className="text-zinc-400 font-semibold">Custom Calculus &amp; Numerical Solver</strong></span>
+          <span>Math Engine: <strong className={`font-semibold ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-700'}`}>Custom Calculus &amp; Numerical Solver</strong></span>
         </span>
       </div>
 
       <div className="flex items-center gap-3">
-        <span className="text-zinc-400">Interactive High-Precision Canvas</span>
+        <span className={isDarkTheme ? 'text-zinc-400' : 'text-zinc-700'}>Interactive High-Precision Canvas</span>
       </div>
     </footer>
   );

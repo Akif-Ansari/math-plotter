@@ -8,6 +8,7 @@ interface ParameterSlidersBarProps {
   onChangeParameter: (paramName: string, value: number) => void;
   onResetParameter: (paramName: string) => void;
   detectedParams: string[];
+  isDarkTheme?: boolean;
 }
 
 export default function ParameterSlidersBar({
@@ -15,6 +16,7 @@ export default function ParameterSlidersBar({
   onChangeParameter,
   onResetParameter,
   detectedParams,
+  isDarkTheme = true,
 }: ParameterSlidersBarProps) {
   const [isPlaying, setIsPlaying] = React.useState<boolean>(false);
   const animFrameRef = React.useRef<number | null>(null);
@@ -47,9 +49,15 @@ export default function ParameterSlidersBar({
   if (detectedParams.length === 0) return null;
 
   return (
-    <div className="absolute bottom-4 left-3 sm:bottom-6 sm:left-6 z-20 bg-zinc-900/95 backdrop-blur-md border border-[#1DB954]/40 text-zinc-100 p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-2xl font-mono text-xs w-[calc(100vw-1.5rem)] sm:w-80 max-w-sm space-y-2.5 sm:space-y-3 animate-in fade-in duration-200">
+    <div className={`absolute bottom-4 left-3 sm:bottom-6 sm:left-6 z-20 backdrop-blur-md border p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-2xl font-mono text-xs w-[calc(100vw-1.5rem)] sm:w-80 max-w-sm space-y-2.5 sm:space-y-3 animate-in fade-in duration-200 ${
+      isDarkTheme
+        ? 'bg-zinc-900/95 border-[#1DB954]/40 text-zinc-100'
+        : 'bg-white/95 border-[#1DB954]/50 text-zinc-900 shadow-xl'
+    }`}>
       {/* Header & Animation Control */}
-      <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
+      <div className={`flex items-center justify-between border-b pb-2 ${
+        isDarkTheme ? 'border-zinc-800' : 'border-zinc-200'
+      }`}>
         <div className="flex items-center gap-2 font-bold text-[#1DB954]">
           <Sliders className="w-4 h-4" />
           <span>Dynamic Parameters</span>
@@ -72,17 +80,24 @@ export default function ParameterSlidersBar({
         {detectedParams.map((param) => {
           const val = parameters[param] !== undefined ? parameters[param] : 1;
           return (
-            <div key={param} className="space-y-1 bg-zinc-950/50 p-2.5 rounded-xl border border-zinc-800">
+            <div
+              key={param}
+              className={`space-y-1 p-2.5 rounded-xl border ${
+                isDarkTheme ? 'bg-zinc-950/50 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
+              }`}
+            >
               <div className="flex justify-between items-center text-[11px]">
                 <span className="font-bold text-[#1DB954]">{param} =</span>
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-white bg-zinc-800 px-2 py-0.5 rounded border border-zinc-700">
+                  <span className={`font-bold px-2 py-0.5 rounded border ${
+                    isDarkTheme ? 'text-white bg-zinc-800 border-zinc-700' : 'text-zinc-900 bg-white border-zinc-300 shadow-sm'
+                  }`}>
                     {val}
                   </span>
                   <button
                     onClick={() => onResetParameter(param)}
                     title={`Reset ${param}`}
-                    className="p-1 text-zinc-500 hover:text-white transition"
+                    className={`p-1 transition ${isDarkTheme ? 'text-zinc-500 hover:text-white' : 'text-zinc-400 hover:text-zinc-900'}`}
                   >
                     <RotateCcw className="w-3 h-3" />
                   </button>
@@ -95,7 +110,9 @@ export default function ParameterSlidersBar({
                 step="0.1"
                 value={val}
                 onChange={(e) => onChangeParameter(param, parseFloat(e.target.value))}
-                className="w-full accent-[#1DB954] cursor-pointer h-1.5 bg-zinc-800 rounded-lg"
+                className={`w-full accent-[#1DB954] cursor-pointer h-1.5 rounded-lg ${
+                  isDarkTheme ? 'bg-zinc-800' : 'bg-zinc-200'
+                }`}
               />
             </div>
           );

@@ -1063,7 +1063,9 @@ export default function GraphCanvas({
   };
 
   return (
-    <div className="relative flex-1 h-full w-full overflow-hidden bg-zinc-950 select-none touch-none" style={{ touchAction: 'none' }}>
+    <div className={`relative flex-1 h-full w-full overflow-hidden select-none touch-none transition-colors duration-200 ${
+      isDarkTheme ? 'bg-zinc-950' : 'bg-[#F8FAFC]'
+    }`} style={{ touchAction: 'none' }}>
       <canvas
         ref={canvasRef}
         onMouseDown={handleMouseDown}
@@ -1076,37 +1078,43 @@ export default function GraphCanvas({
 
       {/* Tangent Explorer Floating HUD Card */}
       {isTangentMode && tangentInfo && (
-        <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-20 bg-zinc-900/95 backdrop-blur-md border border-[#1DB954]/40 text-zinc-100 p-3 sm:p-4 rounded-xl shadow-2xl font-mono text-xs max-w-[calc(100vw-2rem)] sm:max-w-xs space-y-2 sm:space-y-2.5 animate-in fade-in duration-150">
-          <div className="flex items-center justify-between border-b border-zinc-800 pb-1.5 sm:pb-2">
+        <div className={`absolute top-3 left-3 sm:top-4 sm:left-4 z-20 backdrop-blur-md border p-3 sm:p-4 rounded-xl shadow-2xl font-mono text-xs max-w-[calc(100vw-2rem)] sm:max-w-xs space-y-2 sm:space-y-2.5 animate-in fade-in duration-150 ${
+          isDarkTheme
+            ? 'bg-zinc-900/95 border-[#1DB954]/40 text-zinc-100'
+            : 'bg-white/95 border-[#1DB954]/50 text-zinc-900 shadow-xl'
+        }`}>
+          <div className={`flex items-center justify-between border-b pb-1.5 sm:pb-2 ${
+            isDarkTheme ? 'border-zinc-800' : 'border-zinc-200'
+          }`}>
             <div className="flex items-center gap-2 font-bold text-[#1DB954]">
               <Compass className="w-4 h-4 text-[#1DB954]" />
               <span>Tangent &amp; Derivative</span>
             </div>
             <span className="w-2 h-2 rounded-full bg-[#1DB954] animate-ping" />
           </div>
-          <div className="space-y-1.5 text-zinc-300 text-[11px]">
+          <div className={`space-y-1.5 text-[11px] ${isDarkTheme ? 'text-zinc-300' : 'text-zinc-700'}`}>
             <div className="flex justify-between">
-              <span className="text-zinc-500">Function:</span>
+              <span className={isDarkTheme ? 'text-zinc-500' : 'text-zinc-400'}>Function:</span>
               <span className="font-semibold" style={{ color: tangentInfo.expressionColor }}>
                 y = {tangentInfo.rawText}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-zinc-500">Point (a, f(a)):</span>
-              <span className="font-semibold text-zinc-100">
+              <span className={isDarkTheme ? 'text-zinc-500' : 'text-zinc-400'}>Point (a, f(a)):</span>
+              <span className={`font-semibold ${isDarkTheme ? 'text-zinc-100' : 'text-zinc-900'}`}>
                 ({tangentInfo.x}, {tangentInfo.y})
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-zinc-500">Slope f'(a):</span>
+              <span className={isDarkTheme ? 'text-zinc-500' : 'text-zinc-400'}>Slope f'(a):</span>
               <span className="font-bold text-[#1DB954]">{tangentInfo.slope}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-zinc-500">Tangent Line:</span>
+              <span className={isDarkTheme ? 'text-zinc-500' : 'text-zinc-400'}>Tangent Line:</span>
               <span className="font-semibold text-[#1DB954]">{tangentInfo.equation}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-zinc-500">Angle θ:</span>
+              <span className={isDarkTheme ? 'text-zinc-500' : 'text-zinc-400'}>Angle θ:</span>
               <span className="text-[#1DB954]">{tangentInfo.angleDegrees}°</span>
             </div>
           </div>
@@ -1116,7 +1124,11 @@ export default function GraphCanvas({
       {/* Floating Viewport Coordinates & Hover Tooltip */}
       {hoverInfo && (
         <div
-          className="absolute z-10 pointer-events-none transform -translate-x-1/2 -translate-y-12 bg-zinc-900/90 backdrop-blur-md text-zinc-100 px-3 py-1.5 rounded-lg border border-zinc-700/80 text-xs font-mono shadow-xl flex items-center gap-2"
+          className={`absolute z-10 pointer-events-none transform -translate-x-1/2 -translate-y-12 backdrop-blur-md px-3 py-1.5 rounded-lg border text-xs font-mono shadow-xl flex items-center gap-2 ${
+            isDarkTheme
+              ? 'bg-zinc-900/90 border-zinc-700/80 text-zinc-100'
+              : 'bg-white/95 border-zinc-300 text-zinc-900 shadow-md'
+          }`}
           style={{
             left: `${hoverInfo.screenX}px`,
             top: `${hoverInfo.screenY}px`,
@@ -1144,7 +1156,9 @@ export default function GraphCanvas({
             className={`p-2 sm:p-2.5 rounded-lg sm:rounded-xl border shadow-lg backdrop-blur-md transition cursor-pointer ${
               integralConfig?.enabled
                 ? 'bg-[#006241]/30 border-[#1DB954] text-[#1DB954] shadow-[#1DB954]/10'
-                : 'bg-zinc-900/90 hover:bg-zinc-800 border-zinc-700/80 text-zinc-200 hover:text-white'
+                : isDarkTheme
+                  ? 'bg-zinc-900/90 hover:bg-zinc-800 border-zinc-700/80 text-zinc-200 hover:text-white'
+                  : 'bg-white/90 hover:bg-zinc-100 border-zinc-200 text-zinc-800 hover:text-black shadow-md'
             }`}
           >
             <Sigma className="w-4 h-4" />
@@ -1159,7 +1173,9 @@ export default function GraphCanvas({
           className={`p-2 sm:p-2.5 rounded-lg sm:rounded-xl border shadow-lg backdrop-blur-md transition cursor-pointer ${
             isTangentMode
               ? 'bg-[#006241]/30 border-[#1DB954] text-[#1DB954] shadow-[#1DB954]/10'
-              : 'bg-zinc-900/90 hover:bg-zinc-800 border-zinc-700/80 text-zinc-200 hover:text-white'
+              : isDarkTheme
+                ? 'bg-zinc-900/90 hover:bg-zinc-800 border-zinc-700/80 text-zinc-200 hover:text-white'
+                : 'bg-white/90 hover:bg-zinc-100 border-zinc-200 text-zinc-800 hover:text-black shadow-md'
           }`}
         >
           <Compass className="w-4 h-4" />
@@ -1167,14 +1183,22 @@ export default function GraphCanvas({
         <button
           onClick={() => applyZoom(0.8)}
           title="Zoom In"
-          className="p-2 sm:p-2.5 bg-zinc-900/90 hover:bg-zinc-800 text-zinc-200 hover:text-white rounded-lg sm:rounded-xl border border-zinc-700/80 shadow-lg backdrop-blur-md transition cursor-pointer"
+          className={`p-2 sm:p-2.5 rounded-lg sm:rounded-xl border shadow-lg backdrop-blur-md transition cursor-pointer ${
+            isDarkTheme
+              ? 'bg-zinc-900/90 hover:bg-zinc-800 border-zinc-700/80 text-zinc-200 hover:text-white'
+              : 'bg-white/90 hover:bg-zinc-100 border-zinc-200 text-zinc-800 hover:text-black shadow-md'
+          }`}
         >
           <ZoomIn className="w-4 h-4" />
         </button>
         <button
           onClick={() => applyZoom(1.25)}
           title="Zoom Out"
-          className="p-2 sm:p-2.5 bg-zinc-900/90 hover:bg-zinc-800 text-zinc-200 hover:text-white rounded-lg sm:rounded-xl border border-zinc-700/80 shadow-lg backdrop-blur-md transition cursor-pointer"
+          className={`p-2 sm:p-2.5 rounded-lg sm:rounded-xl border shadow-lg backdrop-blur-md transition cursor-pointer ${
+            isDarkTheme
+              ? 'bg-zinc-900/90 hover:bg-zinc-800 border-zinc-700/80 text-zinc-200 hover:text-white'
+              : 'bg-white/90 hover:bg-zinc-100 border-zinc-200 text-zinc-800 hover:text-black shadow-md'
+          }`}
         >
           <ZoomOut className="w-4 h-4" />
         </button>
@@ -1188,14 +1212,22 @@ export default function GraphCanvas({
             })
           }
           title="Reset Zoom Scale"
-          className="p-2 sm:p-2.5 bg-zinc-900/90 hover:bg-zinc-800 text-zinc-200 hover:text-white rounded-lg sm:rounded-xl border border-zinc-700/80 shadow-lg backdrop-blur-md transition cursor-pointer"
+          className={`p-2 sm:p-2.5 rounded-lg sm:rounded-xl border shadow-lg backdrop-blur-md transition cursor-pointer ${
+            isDarkTheme
+              ? 'bg-zinc-900/90 hover:bg-zinc-800 border-zinc-700/80 text-zinc-200 hover:text-white'
+              : 'bg-white/90 hover:bg-zinc-100 border-zinc-200 text-zinc-800 hover:text-black shadow-md'
+          }`}
         >
           <Maximize2 className="w-4 h-4" />
         </button>
       </div>
 
       {/* Axis Helper Indicator */}
-      <div className="absolute top-3 right-3 sm:top-4 sm:right-6 bg-zinc-900/80 backdrop-blur-md px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg border border-zinc-800 text-[10px] sm:text-[11px] font-mono text-zinc-400 flex items-center gap-2 sm:gap-3">
+      <div className={`absolute top-3 right-3 sm:top-4 sm:right-6 backdrop-blur-md px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg border text-[10px] sm:text-[11px] font-mono flex items-center gap-2 sm:gap-3 ${
+        isDarkTheme
+          ? 'bg-zinc-900/80 border-zinc-800 text-zinc-400'
+          : 'bg-white/90 border-zinc-200 text-zinc-600 shadow-sm'
+      }`}>
         <span className="hidden md:flex items-center gap-1">
           <Move className="w-3 h-3 text-[#1DB954]" /> Pan / Scroll to Zoom
         </span>

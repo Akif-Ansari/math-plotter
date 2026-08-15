@@ -10,6 +10,7 @@ interface TableModalProps {
   initialExpressionId?: string | null;
   viewport: Viewport;
   onClose: () => void;
+  isDarkTheme?: boolean;
 }
 
 export default function TableModal({
@@ -17,6 +18,7 @@ export default function TableModal({
   initialExpressionId,
   viewport,
   onClose,
+  isDarkTheme = true,
 }: TableModalProps) {
   const visibleExprs = React.useMemo(
     () => expressions.filter((e) => e.visible && e.type === 'cartesian'),
@@ -127,38 +129,52 @@ export default function TableModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-2 sm:p-4 animate-in fade-in duration-200">
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+      <div className={`border rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden transition-colors duration-200 ${
+        isDarkTheme ? 'bg-zinc-900 border-zinc-800 text-white' : 'bg-white border-zinc-200 text-zinc-900'
+      }`}>
         {/* Modal Header */}
-        <div className="px-4 py-3 sm:px-6 sm:py-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/50">
+        <div className={`px-4 py-3 sm:px-6 sm:py-4 border-b flex items-center justify-between ${
+          isDarkTheme ? 'bg-zinc-950/50 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
+        }`}>
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="p-1.5 sm:p-2 rounded-xl bg-[#006241]/20 border border-[#1DB954]/30 text-[#1DB954] flex-shrink-0">
               <TableIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div className="min-w-0">
-              <h2 className="text-base sm:text-lg font-bold text-zinc-100 truncate">Table of Values</h2>
-              <p className="text-[11px] sm:text-xs text-zinc-400 truncate">Numerical data table for Cartesian expressions</p>
+              <h2 className={`text-base sm:text-lg font-bold truncate ${isDarkTheme ? 'text-zinc-100' : 'text-zinc-900'}`}>
+                Table of Values
+              </h2>
+              <p className={`text-[11px] sm:text-xs truncate ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                Numerical data table for Cartesian expressions
+              </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 sm:p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800 transition flex-shrink-0"
+            className={`p-1.5 sm:p-2 rounded-lg transition flex-shrink-0 ${
+              isDarkTheme ? 'text-zinc-400 hover:text-white hover:bg-zinc-800' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
+            }`}
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Modal Controls */}
-        <div className="p-3.5 sm:p-6 border-b border-zinc-800/80 bg-zinc-900 flex flex-wrap gap-2.5 sm:gap-4 items-center justify-between">
+        <div className={`p-3.5 sm:p-6 border-b flex flex-wrap gap-2.5 sm:gap-4 items-center justify-between ${
+          isDarkTheme ? 'bg-zinc-900 border-zinc-800/80' : 'bg-zinc-50/70 border-zinc-200'
+        }`}>
           <div className="flex flex-wrap gap-4 items-center">
             {/* Function Select */}
             <div className="flex flex-col gap-1">
-              <label className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">
+              <label className={`text-[11px] font-medium uppercase tracking-wider ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 Function
               </label>
               <select
                 value={selectedExprId}
                 onChange={(e) => setSelectedExprId(e.target.value)}
-                className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-[#1DB954]"
+                className={`border text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-[#1DB954] ${
+                  isDarkTheme ? 'bg-zinc-800 border-zinc-700 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-900'
+                }`}
               >
                 <option value="all">All Visible Cartesian Functions</option>
                 {visibleExprs.map((expr) => (
@@ -171,39 +187,45 @@ export default function TableModal({
 
             {/* Start X */}
             <div className="flex flex-col gap-1 w-24">
-              <label className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">
+              <label className={`text-[11px] font-medium uppercase tracking-wider ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 Start (xMin)
               </label>
               <input
                 type="number"
                 value={xMinVal}
                 onChange={(e) => setXMinVal(parseFloat(e.target.value) || -10)}
-                className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-[#1DB954]"
+                className={`border text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-[#1DB954] ${
+                  isDarkTheme ? 'bg-zinc-800 border-zinc-700 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-900'
+                }`}
               />
             </div>
 
             {/* End X */}
             <div className="flex flex-col gap-1 w-24">
-              <label className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">
+              <label className={`text-[11px] font-medium uppercase tracking-wider ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 End (xMax)
               </label>
               <input
                 type="number"
                 value={xMaxVal}
                 onChange={(e) => setXMaxVal(parseFloat(e.target.value) || 10)}
-                className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-[#1DB954]"
+                className={`border text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-[#1DB954] ${
+                  isDarkTheme ? 'bg-zinc-800 border-zinc-700 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-900'
+                }`}
               />
             </div>
 
             {/* Step Size */}
             <div className="flex flex-col gap-1 w-28">
-              <label className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">
+              <label className={`text-[11px] font-medium uppercase tracking-wider ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 Step (Δx)
               </label>
               <select
                 value={stepVal}
                 onChange={(e) => setStepVal(parseFloat(e.target.value))}
-                className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-[#1DB954]"
+                className={`border text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-[#1DB954] ${
+                  isDarkTheme ? 'bg-zinc-800 border-zinc-700 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-900'
+                }`}
               >
                 <option value={0.1}>0.1</option>
                 <option value={0.25}>0.25</option>
@@ -218,7 +240,11 @@ export default function TableModal({
           <div className="flex items-center gap-2">
             <button
               onClick={handleCopyTSV}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-xs font-medium transition cursor-pointer"
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-medium transition cursor-pointer ${
+                isDarkTheme
+                  ? 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-200'
+                  : 'bg-zinc-100 hover:bg-zinc-200 border-zinc-300 text-zinc-800'
+              }`}
             >
               {copied ? <Check className="w-3.5 h-3.5 text-[#1DB954]" /> : <Copy className="w-3.5 h-3.5" />}
               {copied ? 'Copied!' : 'Copy Table'}
@@ -236,15 +262,19 @@ export default function TableModal({
         {/* Data Table */}
         <div className="flex-1 overflow-auto p-4 sm:p-6">
           {targetExpressions.length === 0 ? (
-            <div className="text-center py-12 text-zinc-500 text-sm">
+            <div className={`text-center py-12 text-sm ${isDarkTheme ? 'text-zinc-500' : 'text-zinc-400'}`}>
               No visible Cartesian functions available to generate table.
             </div>
           ) : (
-            <div className="border border-zinc-800 rounded-xl overflow-hidden bg-zinc-950">
+            <div className={`border rounded-xl overflow-hidden ${
+              isDarkTheme ? 'bg-zinc-950 border-zinc-800' : 'bg-white border-zinc-200 shadow-sm'
+            }`}>
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="bg-zinc-900/90 border-b border-zinc-800 text-zinc-400 font-mono">
-                    <th className="py-3 px-4 w-28 border-r border-zinc-800">x</th>
+                  <tr className={`border-b font-mono ${
+                    isDarkTheme ? 'bg-zinc-900/90 border-zinc-800 text-zinc-400' : 'bg-zinc-100 border-zinc-200 text-zinc-700'
+                  }`}>
+                    <th className={`py-3 px-4 w-28 border-r ${isDarkTheme ? 'border-zinc-800' : 'border-zinc-200'}`}>x</th>
                     {targetExpressions.map((expr) => (
                       <th
                         key={expr.id}
@@ -256,10 +286,16 @@ export default function TableModal({
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-800/60 font-mono text-zinc-300">
+                <tbody className={`divide-y font-mono ${
+                  isDarkTheme ? 'divide-zinc-800/60 text-zinc-300' : 'divide-zinc-200 text-zinc-700'
+                }`}>
                   {tableData.map((row, idx) => (
-                    <tr key={idx} className="hover:bg-zinc-900/50 transition">
-                      <td className="py-2.5 px-4 font-bold text-zinc-200 border-r border-zinc-800 bg-zinc-900/30">
+                    <tr key={idx} className={`transition ${
+                      isDarkTheme ? 'hover:bg-zinc-900/50' : 'hover:bg-zinc-50'
+                    }`}>
+                      <td className={`py-2.5 px-4 font-bold border-r ${
+                        isDarkTheme ? 'text-zinc-200 border-zinc-800 bg-zinc-900/30' : 'text-zinc-900 border-zinc-200 bg-zinc-50'
+                      }`}>
                         {row.x}
                       </td>
                       {targetExpressions.map((expr) => {
@@ -277,7 +313,9 @@ export default function TableModal({
                                 )}
                               </span>
                             ) : (
-                              <span className="text-zinc-600 italic">Undefined</span>
+                              <span className={isDarkTheme ? 'text-zinc-600 italic' : 'text-zinc-400 italic'}>
+                                Undefined
+                              </span>
                             )}
                           </td>
                         );

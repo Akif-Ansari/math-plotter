@@ -9,37 +9,49 @@ interface AnalysisModalProps {
   analysis: AnalysisResult | null;
   expressionColor?: string;
   onClose: () => void;
+  isDarkTheme?: boolean;
 }
 
 export default function AnalysisModal({
   analysis,
   expressionColor = '#1DB954',
   onClose,
+  isDarkTheme = true,
 }: AnalysisModalProps) {
   if (!analysis) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className={`relative w-full max-w-xl border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] transition-colors duration-200 ${
+        isDarkTheme ? 'bg-zinc-900 border-zinc-800 text-white' : 'bg-white border-zinc-200 text-zinc-900'
+      }`}>
         {/* Modal Header */}
-        <div className="p-3.5 sm:p-5 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/60">
+        <div className={`p-3.5 sm:p-5 border-b flex items-center justify-between ${
+          isDarkTheme ? 'bg-zinc-950/60 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
+        }`}>
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <div
               className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full shadow-sm flex-shrink-0"
               style={{ backgroundColor: expressionColor }}
             />
             <div className="min-w-0">
-              <h2 className="text-sm sm:text-base font-bold text-white flex items-center gap-2 truncate">
+              <h2 className={`text-sm sm:text-base font-bold flex items-center gap-2 truncate ${
+                isDarkTheme ? 'text-white' : 'text-zinc-900'
+              }`}>
                 Function Calculus Analysis
               </h2>
-              <p className="text-[11px] sm:text-xs text-zinc-400 font-mono mt-0.5 truncate">
+              <p className={`text-[11px] sm:text-xs font-mono mt-0.5 truncate ${
+                isDarkTheme ? 'text-zinc-400' : 'text-zinc-500'
+              }`}>
                 y = {analysis.rawText}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 sm:p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition cursor-pointer flex-shrink-0"
+            className={`p-1 sm:p-1.5 rounded-lg transition cursor-pointer flex-shrink-0 ${
+              isDarkTheme ? 'text-zinc-400 hover:text-white hover:bg-zinc-800' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
+            }`}
           >
             <X className="w-5 h-5" />
           </button>
@@ -55,22 +67,26 @@ export default function AnalysisModal({
           ) : (
             <>
               {/* LaTeX Preview */}
-              <div className="p-3 sm:p-4 bg-zinc-950/80 rounded-xl border border-zinc-800/80 flex items-center justify-center overflow-x-auto">
+              <div className={`p-3 sm:p-4 rounded-xl border flex items-center justify-center overflow-x-auto ${
+                isDarkTheme ? 'bg-zinc-950/80 border-zinc-800/80 text-white' : 'bg-zinc-50 border-zinc-200 text-zinc-900'
+              }`}>
                 <KaTeXRenderer
                   latex={`f(x) = ${analysis.rawText}`}
                   displayMode
-                  className="text-base sm:text-lg text-white"
+                  className={`text-base sm:text-lg ${isDarkTheme ? 'text-white' : 'text-zinc-900'}`}
                 />
               </div>
 
               {/* Notation Guide Banner */}
-              <div className="p-2.5 sm:p-3 bg-[#006241]/20 border border-[#1DB954]/30 rounded-xl text-xs text-[#1DB954] flex items-start gap-2">
+              <div className={`p-2.5 sm:p-3 rounded-xl border text-xs flex items-start gap-2 ${
+                isDarkTheme ? 'bg-[#006241]/20 border-[#1DB954]/30 text-[#1DB954]' : 'bg-[#006241]/10 border-[#1DB954]/30 text-[#006241]'
+              }`}>
                 <Info className="w-4 h-4 text-[#1DB954] mt-0.5 flex-shrink-0" />
                 <div>
                   <span className="font-semibold text-[11px] sm:text-xs">Interval Bound Notation Guide:</span>
-                  <div className="mt-0.5 text-[10px] sm:text-[11px] text-zinc-300">
+                  <div className={`mt-0.5 text-[10px] sm:text-[11px] ${isDarkTheme ? 'text-zinc-300' : 'text-zinc-600'}`}>
                     <code className="text-[#1DB954] font-bold">[</code> or <code className="text-[#1DB954] font-bold">]</code> = <strong>Closed bound</strong> (value included in domain/range).<br />
-                    <code className="text-[#1DB954] font-bold">(</code> or <code className="text-[#1DB954] font-bold">)</code> = <strong>Open bound</strong> (value excluded, infinity, or asymptote). E.g. <code className="text-[#1DB954]">Range = [-∞, 3)</code> means 3 is an open bound.
+                    <code className="text-[#1DB954] font-bold">(</code> or <code className="text-[#1DB954] font-bold">)</code> = <strong>Open bound</strong> (value excluded, infinity, or asymptote). E.g. <code className="font-semibold">Range = [-∞, 3)</code> means 3 is an open bound.
                   </div>
                 </div>
               </div>
@@ -78,8 +94,12 @@ export default function AnalysisModal({
               {/* Key Metrics Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-4">
                 {/* Domain */}
-                <div className="p-4 bg-zinc-800/40 rounded-xl border border-zinc-800 flex flex-col justify-between">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-zinc-400 mb-1">
+                <div className={`p-4 rounded-xl border flex flex-col justify-between ${
+                  isDarkTheme ? 'bg-zinc-800/40 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
+                }`}>
+                  <div className={`flex items-center gap-2 text-xs font-semibold mb-1 ${
+                    isDarkTheme ? 'text-zinc-400' : 'text-zinc-500'
+                  }`}>
                     <Compass className="w-4 h-4 text-[#1DB954]" />
                     Domain
                   </div>
@@ -89,8 +109,12 @@ export default function AnalysisModal({
                 </div>
 
                 {/* Range */}
-                <div className="p-4 bg-zinc-800/40 rounded-xl border border-zinc-800 flex flex-col justify-between">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-zinc-400 mb-1">
+                <div className={`p-4 rounded-xl border flex flex-col justify-between ${
+                  isDarkTheme ? 'bg-zinc-800/40 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
+                }`}>
+                  <div className={`flex items-center gap-2 text-xs font-semibold mb-1 ${
+                    isDarkTheme ? 'text-zinc-400' : 'text-zinc-500'
+                  }`}>
                     <ArrowUpRight className="w-4 h-4 text-[#1DB954]" />
                     Range
                   </div>
@@ -100,8 +124,12 @@ export default function AnalysisModal({
                 </div>
 
                 {/* Root Count */}
-                <div className="p-4 bg-zinc-800/40 rounded-xl border border-zinc-800 flex flex-col justify-between">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-zinc-400 mb-1">
+                <div className={`p-4 rounded-xl border flex flex-col justify-between ${
+                  isDarkTheme ? 'bg-zinc-800/40 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
+                }`}>
+                  <div className={`flex items-center gap-2 text-xs font-semibold mb-1 ${
+                    isDarkTheme ? 'text-zinc-400' : 'text-zinc-500'
+                  }`}>
                     <Hash className="w-4 h-4 text-[#1DB954]" />
                     Number of Roots
                   </div>
@@ -111,8 +139,12 @@ export default function AnalysisModal({
                 </div>
 
                 {/* Y-Intercept */}
-                <div className="p-4 bg-zinc-800/40 rounded-xl border border-zinc-800 flex flex-col justify-between">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-zinc-400 mb-1">
+                <div className={`p-4 rounded-xl border flex flex-col justify-between ${
+                  isDarkTheme ? 'bg-zinc-800/40 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
+                }`}>
+                  <div className={`flex items-center gap-2 text-xs font-semibold mb-1 ${
+                    isDarkTheme ? 'text-zinc-400' : 'text-zinc-500'
+                  }`}>
                     <CheckCircle2 className="w-4 h-4 text-[#1DB954]" />
                     Y-Intercept
                   </div>
@@ -123,13 +155,19 @@ export default function AnalysisModal({
               </div>
 
               {/* Roots List */}
-              <div className="p-4 bg-zinc-800/30 rounded-xl border border-zinc-800">
-                <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+              <div className={`p-4 rounded-xl border ${
+                isDarkTheme ? 'bg-zinc-800/30 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
+              }`}>
+                <h3 className={`text-xs font-semibold uppercase tracking-wider mb-2 flex items-center justify-between ${
+                  isDarkTheme ? 'text-zinc-400' : 'text-zinc-600'
+                }`}>
                   <span>Roots / X-Intercepts ({analysis.roots.length})</span>
                   <span className="text-[#1DB954] font-mono text-[10px]">f(x) = 0</span>
                 </h3>
                 {analysis.roots.length === 0 ? (
-                  <p className="text-xs text-zinc-500 italic">No real roots found in current viewport.</p>
+                  <p className={`text-xs italic ${isDarkTheme ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                    No real roots found in current viewport.
+                  </p>
                 ) : (
                   <div className="flex flex-wrap gap-2">
                     {analysis.roots.map((root, i) => (
@@ -145,12 +183,18 @@ export default function AnalysisModal({
               </div>
 
               {/* Asymptotes */}
-              <div className="p-4 bg-zinc-800/30 rounded-xl border border-zinc-800">
-                <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">
+              <div className={`p-4 rounded-xl border ${
+                isDarkTheme ? 'bg-zinc-800/30 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
+              }`}>
+                <h3 className={`text-xs font-semibold uppercase tracking-wider mb-2 ${
+                  isDarkTheme ? 'text-zinc-400' : 'text-zinc-600'
+                }`}>
                   Asymptotes ({analysis.asymptotes.length})
                 </h3>
                 {analysis.asymptotes.length === 0 ? (
-                  <p className="text-xs text-zinc-500 italic">No asymptotes detected in current viewport.</p>
+                  <p className={`text-xs italic ${isDarkTheme ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                    No asymptotes detected in current viewport.
+                  </p>
                 ) : (
                   <div className="flex flex-wrap gap-2">
                     {analysis.asymptotes.map((asymp, i) => (
@@ -167,11 +211,15 @@ export default function AnalysisModal({
 
               {/* Symbolic Derivative */}
               {analysis.derivativeText && (
-                <div className="p-4 bg-zinc-800/30 rounded-xl border border-zinc-800 flex items-center justify-between">
+                <div className={`p-4 rounded-xl border flex items-center justify-between ${
+                  isDarkTheme ? 'bg-zinc-800/30 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
+                }`}>
                   <div className="flex items-center gap-2">
                     <Spline className="w-4 h-4 text-[#1DB954]" />
                     <div>
-                      <div className="text-xs font-semibold text-zinc-400">First Derivative f'(x)</div>
+                      <div className={`text-xs font-semibold ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                        First Derivative f'(x)
+                      </div>
                       <div className="text-xs font-mono text-[#1DB954] mt-0.5">{analysis.derivativeText}</div>
                     </div>
                   </div>

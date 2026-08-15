@@ -11,6 +11,7 @@ interface IntegralControlModalProps {
   onChangeConfig: (config: IntegralConfig) => void;
   onClose: () => void;
   parameters?: Record<string, number>;
+  isDarkTheme?: boolean;
 }
 
 export default function IntegralControlModal({
@@ -19,6 +20,7 @@ export default function IntegralControlModal({
   onChangeConfig,
   onClose,
   parameters = {},
+  isDarkTheme = true,
 }: IntegralControlModalProps) {
   const visibleCartesian = React.useMemo(
     () => expressions.filter((e) => e.visible && e.type === 'cartesian'),
@@ -95,21 +97,31 @@ export default function IntegralControlModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-2 sm:p-4 animate-in fade-in duration-200">
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div className={`border rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col transition-colors duration-200 ${
+        isDarkTheme ? 'bg-zinc-900 border-zinc-800 text-white' : 'bg-white border-zinc-200 text-zinc-900'
+      }`}>
         {/* Modal Header */}
-        <div className="px-4 py-3 sm:px-6 sm:py-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/50">
+        <div className={`px-4 py-3 sm:px-6 sm:py-4 border-b flex items-center justify-between ${
+          isDarkTheme ? 'bg-zinc-950/50 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
+        }`}>
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="p-1.5 sm:p-2 rounded-xl bg-[#006241]/20 border border-[#1DB954]/30 text-[#1DB954] flex-shrink-0">
               <Activity className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div className="min-w-0">
-              <h2 className="text-base sm:text-lg font-bold text-zinc-100 truncate">Definite Integral &amp; Riemann Sums</h2>
-              <p className="text-[11px] sm:text-xs text-zinc-400 truncate">Visualize area under the curve &amp; numerical integration</p>
+              <h2 className={`text-base sm:text-lg font-bold truncate ${isDarkTheme ? 'text-zinc-100' : 'text-zinc-900'}`}>
+                Definite Integral &amp; Riemann Sums
+              </h2>
+              <p className={`text-[11px] sm:text-xs truncate ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                Visualize area under the curve &amp; numerical integration
+              </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 sm:p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800 transition flex-shrink-0"
+            className={`p-1.5 sm:p-2 rounded-lg transition flex-shrink-0 ${
+              isDarkTheme ? 'text-zinc-400 hover:text-white hover:bg-zinc-800' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
+            }`}
           >
             <X className="w-5 h-5" />
           </button>
@@ -118,15 +130,21 @@ export default function IntegralControlModal({
         {/* Modal Content */}
         <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto">
           {/* Master Enable Switch */}
-          <div className="flex items-center justify-between p-4 bg-zinc-950/70 border border-zinc-800 rounded-xl">
+          <div className={`flex items-center justify-between p-4 border rounded-xl ${
+            isDarkTheme ? 'bg-zinc-950/70 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
+          }`}>
             <div>
-              <span className="font-semibold text-sm text-zinc-200">Show Integral Area Shading</span>
-              <p className="text-xs text-zinc-400">Render definite integral bounds and Riemann rectangles on canvas</p>
+              <span className={`font-semibold text-sm ${isDarkTheme ? 'text-zinc-200' : 'text-zinc-800'}`}>
+                Show Integral Area Shading
+              </span>
+              <p className={`text-xs ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                Render definite integral bounds and Riemann rectangles on canvas
+              </p>
             </div>
             <button
               onClick={() => onChangeConfig({ ...config, enabled: !config.enabled })}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                config.enabled ? 'bg-[#1DB954]' : 'bg-zinc-700'
+                config.enabled ? 'bg-[#1DB954]' : isDarkTheme ? 'bg-zinc-700' : 'bg-zinc-300'
               }`}
             >
               <span
@@ -141,13 +159,15 @@ export default function IntegralControlModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Primary Function */}
             <div>
-              <label className="text-xs font-medium text-zinc-300 block mb-1.5">
+              <label className={`text-xs font-medium block mb-1.5 ${isDarkTheme ? 'text-zinc-300' : 'text-zinc-700'}`}>
                 Primary Function f(x)
               </label>
               <select
                 value={config.expressionId}
                 onChange={(e) => onChangeConfig({ ...config, expressionId: e.target.value })}
-                className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-lg p-2.5 focus:outline-none focus:border-[#1DB954]"
+                className={`w-full border text-xs rounded-lg p-2.5 focus:outline-none focus:border-[#1DB954] ${
+                  isDarkTheme ? 'bg-zinc-800 border-zinc-700 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-900'
+                }`}
               >
                 {visibleCartesian.map((expr) => (
                   <option key={expr.id} value={expr.id}>
@@ -159,7 +179,7 @@ export default function IntegralControlModal({
 
             {/* Secondary Function (Area Between Curves) */}
             <div>
-              <label className="text-xs font-medium text-zinc-300 block mb-1.5">
+              <label className={`text-xs font-medium block mb-1.5 ${isDarkTheme ? 'text-zinc-300' : 'text-zinc-700'}`}>
                 Subtract g(x) (Area Between Curves)
               </label>
               <select
@@ -167,7 +187,9 @@ export default function IntegralControlModal({
                 onChange={(e) =>
                   onChangeConfig({ ...config, expressionId2: e.target.value || null })
                 }
-                className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-lg p-2.5 focus:outline-none focus:border-[#1DB954]"
+                className={`w-full border text-xs rounded-lg p-2.5 focus:outline-none focus:border-[#1DB954] ${
+                  isDarkTheme ? 'bg-zinc-800 border-zinc-700 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-900'
+                }`}
               >
                 <option value="">None (Integrate relative to X-Axis)</option>
                 {visibleCartesian
@@ -184,7 +206,7 @@ export default function IntegralControlModal({
           {/* Integration Bounds [a, b] */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-medium text-zinc-300 block mb-1.5">
+              <label className={`text-xs font-medium block mb-1.5 ${isDarkTheme ? 'text-zinc-300' : 'text-zinc-700'}`}>
                 Lower Bound (a)
               </label>
               <input
@@ -192,11 +214,13 @@ export default function IntegralControlModal({
                 step="0.5"
                 value={config.a}
                 onChange={(e) => onChangeConfig({ ...config, a: parseFloat(e.target.value) || 0 })}
-                className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-lg p-2.5 focus:outline-none focus:border-[#1DB954] font-mono"
+                className={`w-full border text-xs rounded-lg p-2.5 focus:outline-none focus:border-[#1DB954] font-mono ${
+                  isDarkTheme ? 'bg-zinc-800 border-zinc-700 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-900'
+                }`}
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-zinc-300 block mb-1.5">
+              <label className={`text-xs font-medium block mb-1.5 ${isDarkTheme ? 'text-zinc-300' : 'text-zinc-700'}`}>
                 Upper Bound (b)
               </label>
               <input
@@ -204,14 +228,16 @@ export default function IntegralControlModal({
                 step="0.5"
                 value={config.b}
                 onChange={(e) => onChangeConfig({ ...config, b: parseFloat(e.target.value) || 0 })}
-                className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-lg p-2.5 focus:outline-none focus:border-[#1DB954] font-mono"
+                className={`w-full border text-xs rounded-lg p-2.5 focus:outline-none focus:border-[#1DB954] font-mono ${
+                  isDarkTheme ? 'bg-zinc-800 border-zinc-700 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-900'
+                }`}
               />
             </div>
           </div>
 
           {/* Riemann Sum Method Selector */}
           <div>
-            <label className="text-xs font-medium text-zinc-300 block mb-2">
+            <label className={`text-xs font-medium block mb-2 ${isDarkTheme ? 'text-zinc-300' : 'text-zinc-700'}`}>
               Integration &amp; Approximation Method
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
@@ -228,7 +254,9 @@ export default function IntegralControlModal({
                   className={`p-2.5 rounded-lg text-xs font-medium border transition ${
                     config.method === item.id
                       ? 'bg-[#006241] border-[#1DB954] text-white shadow-md'
-                      : 'bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-700'
+                      : isDarkTheme
+                        ? 'bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-700'
+                        : 'bg-zinc-100 border-zinc-300 text-zinc-700 hover:bg-zinc-200'
                   }`}
                 >
                   {item.label}
@@ -241,7 +269,9 @@ export default function IntegralControlModal({
           {config.method !== 'exact' && (
             <div>
               <div className="flex justify-between items-center mb-1.5 text-xs">
-                <span className="font-medium text-zinc-300">Subintervals (N)</span>
+                <span className={`font-medium ${isDarkTheme ? 'text-zinc-300' : 'text-zinc-700'}`}>
+                  Subintervals (N)
+                </span>
                 <span className="font-mono text-[#1DB954] font-bold">{config.n} rectangles</span>
               </div>
               <input
@@ -257,18 +287,20 @@ export default function IntegralControlModal({
           )}
 
           {/* Live Calculation Results Card */}
-          <div className="p-4 bg-[#006241]/20 border border-[#1DB954]/30 rounded-xl space-y-2 font-mono text-xs">
+          <div className={`p-4 rounded-xl space-y-2 font-mono text-xs border ${
+            isDarkTheme ? 'bg-[#006241]/20 border-[#1DB954]/30' : 'bg-[#006241]/10 border-[#1DB954]/30'
+          }`}>
             <div className="flex justify-between items-center text-[#1DB954]">
-              <span className="text-zinc-400">Definite Integral ∫ₐᵇ f(x) dx:</span>
+              <span className={isDarkTheme ? 'text-zinc-400' : 'text-zinc-600'}>Definite Integral ∫ₐᵇ f(x) dx:</span>
               <span className="text-base font-bold text-[#1DB954]">{integrationData.exact}</span>
             </div>
             {config.method !== 'exact' && (
               <>
-                <div className="flex justify-between items-center text-zinc-300">
-                  <span className="text-zinc-400">Riemann Sum Approximation ({config.method}):</span>
+                <div className={`flex justify-between items-center ${isDarkTheme ? 'text-zinc-300' : 'text-zinc-700'}`}>
+                  <span className={isDarkTheme ? 'text-zinc-400' : 'text-zinc-600'}>Riemann Sum Approximation ({config.method}):</span>
                   <span className="font-bold text-[#1DB954]">{integrationData.approx}</span>
                 </div>
-                <div className="flex justify-between items-center text-zinc-400">
+                <div className={`flex justify-between items-center ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-600'}`}>
                   <span>Approximation Error |S_N - Exact|:</span>
                   <span className="text-[#1DB954] font-semibold">{integrationData.error}</span>
                 </div>
@@ -278,7 +310,9 @@ export default function IntegralControlModal({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-zinc-800 flex justify-end bg-zinc-950/50">
+        <div className={`px-6 py-4 border-t flex justify-end ${
+          isDarkTheme ? 'bg-zinc-950/50 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
+        }`}>
           <button
             onClick={onClose}
             className="flex items-center gap-1.5 px-4 py-2 bg-[#1DB954] hover:bg-[#18a349] text-black rounded-lg text-xs font-semibold transition cursor-pointer shadow-md shadow-[#1DB954]/20"
