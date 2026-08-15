@@ -144,11 +144,10 @@ export default function ExpressionList({
           return (
             <div
               key={expr.id}
-              className={`p-3 rounded-xl border transition-all ${
-                activeInputId === expr.id
+              className={`p-3 rounded-xl border transition-all ${activeInputId === expr.id
                   ? 'border-indigo-500/80 bg-zinc-800/80 shadow-lg shadow-indigo-500/10'
                   : 'border-zinc-800 bg-zinc-950/60 hover:border-zinc-700'
-              }`}
+                }`}
             >
               {/* Top Control Bar */}
               <div className="flex items-center justify-between mb-2">
@@ -193,9 +192,8 @@ export default function ExpressionList({
                   <button
                     onClick={() => setEditingSettingsId(isCustomizing ? null : expr.id)}
                     title="Customize Styling & Label"
-                    className={`p-1 rounded transition cursor-pointer ${
-                      isCustomizing ? 'text-indigo-400 bg-zinc-800' : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
-                    }`}
+                    className={`p-1 rounded transition cursor-pointer ${isCustomizing ? 'text-indigo-400 bg-zinc-800' : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+                      }`}
                   >
                     <Sliders className="w-3.5 h-3.5" />
                   </button>
@@ -317,9 +315,8 @@ export default function ExpressionList({
                         <button
                           key={c}
                           onClick={() => onUpdateExpression(expr.id, { color: c })}
-                          className={`w-4 h-4 rounded-full transition transform hover:scale-125 ${
-                            expr.color === c ? 'ring-2 ring-white scale-110' : ''
-                          }`}
+                          className={`w-4 h-4 rounded-full transition transform hover:scale-125 ${expr.color === c ? 'ring-2 ring-white scale-110' : ''
+                            }`}
                           style={{ backgroundColor: c }}
                         />
                       ))}
@@ -369,10 +366,10 @@ export default function ExpressionList({
                         expr.type === 'polar'
                           ? '3 * theta'
                           : expr.type === 'implicit'
-                          ? 'y^2 = x'
-                          : expr.type === 'x_of_y'
-                          ? 'y^2'
-                          : 'sqrt(x)'
+                            ? 'y^2 = x'
+                            : expr.type === 'x_of_y'
+                              ? 'y^2'
+                              : 'sqrt(x)'
                       }
                       className="flex-1 bg-zinc-900 border border-zinc-700/80 rounded px-2.5 py-1 text-xs text-white font-mono focus:outline-none focus:border-indigo-500"
                     />

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { MathExpression, IntegralConfig } from '@/types/math';
 import { compileExpression } from '@/lib/math-engine/parser';
 import { X, Layers, Activity, Check } from 'lucide-react';
@@ -20,7 +20,7 @@ export default function IntegralControlModal({
   onClose,
   parameters = {},
 }: IntegralControlModalProps) {
-  const visibleCartesian = useMemo(
+  const visibleCartesian = React.useMemo(
     () => expressions.filter((e) => e.visible && e.type === 'cartesian'),
     [expressions]
   );
@@ -29,7 +29,7 @@ export default function IntegralControlModal({
   const secondaryExpr = visibleCartesian.find((e) => e.id === config.expressionId2);
 
   // Numerical Integration calculations
-  const integrationData = useMemo(() => {
+  const integrationData = React.useMemo(() => {
     if (!primaryExpr) {
       return { exact: 0, approx: 0, error: 0 };
     }

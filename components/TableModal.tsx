@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import { MathExpression, Viewport } from '@/types/math';
 import { compileExpression } from '@/lib/math-engine/parser';
 import { X, Download, Copy, Check, Table as TableIcon } from 'lucide-react';
@@ -18,29 +18,29 @@ export default function TableModal({
   viewport,
   onClose,
 }: TableModalProps) {
-  const visibleExprs = useMemo(
+  const visibleExprs = React.useMemo(
     () => expressions.filter((e) => e.visible && e.type === 'cartesian'),
     [expressions]
   );
 
-  const [selectedExprId, setSelectedExprId] = useState<string>(
+  const [selectedExprId, setSelectedExprId] = React.useState<string>(
     initialExpressionId && visibleExprs.some((e) => e.id === initialExpressionId)
       ? initialExpressionId
       : 'all'
   );
 
-  const [xMinVal, setXMinVal] = useState<number>(
+  const [xMinVal, setXMinVal] = React.useState<number>(
     Math.round(viewport.xMin)
   );
-  const [xMaxVal, setXMaxVal] = useState<number>(
+  const [xMaxVal, setXMaxVal] = React.useState<number>(
     Math.round(viewport.xMax)
   );
-  const [stepVal, setStepVal] = useState<number>(0.5);
+  const [stepVal, setStepVal] = React.useState<number>(0.5);
 
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = React.useState(false);
 
   // Target expressions to include in table
-  const targetExpressions = useMemo(() => {
+  const targetExpressions = React.useMemo(() => {
     if (selectedExprId === 'all') {
       return visibleExprs;
     }
@@ -48,7 +48,7 @@ export default function TableModal({
   }, [visibleExprs, selectedExprId]);
 
   // Generate compiled evaluation functions
-  const compiledFns = useMemo(() => {
+  const compiledFns = React.useMemo(() => {
     return targetExpressions.map((expr) => ({
       expr,
       ...compileExpression(expr.rawText, 'x'),
@@ -56,7 +56,7 @@ export default function TableModal({
   }, [targetExpressions]);
 
   // Generate table row data
-  const tableData = useMemo(() => {
+  const tableData = React.useMemo(() => {
     const rows: { x: number; values: Record<string, number | null> }[] = [];
     const min = Math.min(xMinVal, xMaxVal);
     const max = Math.max(xMinVal, xMaxVal);

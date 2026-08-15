@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React from 'react';
 import { MathExpression, Viewport, SnapPoint, AnalysisResult, TangentInfo, IntegralConfig } from '@/types/math';
 import { compileExpression, compile2DExpression, isImplicitEquation } from '@/lib/math-engine/parser';
 import { analyzeFunction, findIntersections } from '@/lib/math-engine/analysis';
@@ -27,23 +27,28 @@ export default function GraphCanvas({
   integralConfig,
   onOpenIntegralModal,
 }: GraphCanvasProps) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const lastAnalysisRef = useRef<string>('');
+  const [isMounted, setIsMounted] = React.useState(false);
+  const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
+  const lastAnalysisRef = React.useRef<string>('');
 
-  const viewportRef = useRef(viewport);
-  useEffect(() => {
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const viewportRef = React.useRef(viewport);
+  React.useEffect(() => {
     viewportRef.current = viewport;
   }, [viewport]);
 
-  const onViewportChangeRef = useRef(onViewportChange);
-  useEffect(() => {
+  const onViewportChangeRef = React.useRef(onViewportChange);
+  React.useEffect(() => {
     onViewportChangeRef.current = onViewportChange;
   }, [onViewportChange]);
 
   // Mouse interaction state
-  const isDragging = useRef(false);
-  const lastMousePos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [hoverInfo, setHoverInfo] = useState<{
+  const isDragging = React.useRef(false);
+  const lastMousePos = React.useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [hoverInfo, setHoverInfo] = React.useState<{
     screenX: number;
     screenY: number;
     mathX: number;
@@ -51,14 +56,14 @@ export default function GraphCanvas({
     snapPoint?: SnapPoint;
   } | null>(null);
 
-  const [snapPoints, setSnapPoints] = useState<SnapPoint[]>([]);
+  const [snapPoints, setSnapPoints] = React.useState<SnapPoint[]>([]);
 
   // Tangent Explorer state
-  const [isTangentMode, setIsTangentMode] = useState<boolean>(false);
-  const [tangentInfo, setTangentInfo] = useState<TangentInfo | null>(null);
+  const [isTangentMode, setIsTangentMode] = React.useState<boolean>(false);
+  const [tangentInfo, setTangentInfo] = React.useState<TangentInfo | null>(null);
 
   // Calculate snap points (Roots, Intercepts, Extrema, Asymptotes, Intersections)
-  const computeAllSnapPoints = useCallback(() => {
+  const computeAllSnapPoints = React.useCallback(() => {
     const points: SnapPoint[] = [];
     const analyses: Record<string, AnalysisResult> = {};
 
@@ -136,16 +141,19 @@ export default function GraphCanvas({
     const currentAnalysisStr = JSON.stringify(analyses);
     if (currentAnalysisStr !== lastAnalysisRef.current) {
       lastAnalysisRef.current = currentAnalysisStr;
-      onAnalysisUpdate(analyses);
+      setTimeout(() => {
+        onAnalysisUpdate(analyses);
+      }, 0);
     }
   }, [expressions, viewport, onAnalysisUpdate]);
 
-  useEffect(() => {
+  React.useEffect(() => {
+    if (!isMounted) return;
     computeAllSnapPoints();
-  }, [computeAllSnapPoints]);
+  }, [isMounted, computeAllSnapPoints]);
 
   // Main Canvas Render Loop
-  const renderCanvas = useCallback(() => {
+  const renderCanvas = React.useCallback(() => {
     try {
       const canvas = canvasRef.current;
       if (!canvas) return;
@@ -735,11 +743,13 @@ export default function GraphCanvas({
   }
   }, [viewport, expressions, snapPoints, hoverInfo, isDarkTheme, isTangentMode, tangentInfo, parameters, integralConfig]);
 
-  useEffect(() => {
+  React.useEffect(() => {
+    if (!isMounted) return;
     renderCanvas();
-  }, [renderCanvas]);
+  }, [isMounted, renderCanvas]);
 
-  useEffect(() => {
+  React.useEffect(() => {
+    if (!isMounted) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -754,11 +764,14 @@ export default function GraphCanvas({
       observer.observe(canvas.parentElement);
     }
 
+    // Trigger immediate frame draw once canvas layout mounts
+    renderCanvas();
+
     return () => {
       window.removeEventListener('resize', handleResize);
       observer.disconnect();
     };
-  }, [renderCanvas]);
+  }, [isMounted, renderCanvas]);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     isDragging.current = true;
@@ -857,7 +870,7 @@ export default function GraphCanvas({
   };
 
   // Helper to apply focal zoom & drag shift
-  const applyFocalZoomAndPan = useCallback(
+  const applyFocalZoomAndPan = React.useCallback(
     (
       factor: number,
       focalScreenX: number,
@@ -903,7 +916,8 @@ export default function GraphCanvas({
   );
 
   // Attach non-passive wheel, touch, and gesture listeners directly to canvas element
-  useEffect(() => {
+  React.useEffect(() => {
+    if (!isMounted) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -913,8 +927,7 @@ export default function GraphCanvas({
     let lastPinchMidpoint: { x: number; y: number } | null = null;
 
     const handleWheelNative = (e: WheelEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
+      if (e.cancelable) e.preventDefault();
 
       const rect = canvas.getBoundingClientRect();
       const sx = e.clientX - rect.left;
@@ -934,8 +947,7 @@ export default function GraphCanvas({
     };
 
     const handleTouchStartNative = (e: TouchEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
+      if (e.cancelable) e.preventDefault();
 
       const rect = canvas.getBoundingClientRect();
       if (e.touches.length === 1) {
@@ -961,8 +973,7 @@ export default function GraphCanvas({
     };
 
     const handleTouchMoveNative = (e: TouchEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
+      if (e.cancelable) e.preventDefault();
 
       const rect = canvas.getBoundingClientRect();
 
@@ -999,8 +1010,7 @@ export default function GraphCanvas({
     };
 
     const handleTouchEndNative = (e: TouchEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
+      if (e.cancelable) e.preventDefault();
 
       const rect = canvas.getBoundingClientRect();
       if (e.touches.length === 0) {
@@ -1020,8 +1030,7 @@ export default function GraphCanvas({
     };
 
     const handleGestureNative = (e: Event) => {
-      e.preventDefault();
-      e.stopPropagation();
+      if (e.cancelable) e.preventDefault();
     };
 
     // Passive: false is crucial so preventDefault stops page zoom
@@ -1044,7 +1053,7 @@ export default function GraphCanvas({
       canvas.removeEventListener('gesturechange', handleGestureNative);
       canvas.removeEventListener('gestureend', handleGestureNative);
     };
-  }, [applyFocalZoomAndPan]);
+  }, [isMounted, applyFocalZoomAndPan]);
 
   const applyZoom = (factor: number) => {
     const canvas = canvasRef.current;

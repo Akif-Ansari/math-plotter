@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React from 'react';
 import Header from '@/components/Header';
 import ExpressionList from '@/components/ExpressionList';
 import GraphCanvas from '@/components/GraphCanvas';
@@ -12,7 +12,7 @@ import Footer from '@/components/Footer';
 import { MathExpression, Viewport, AnalysisResult, IntegralConfig } from '@/types/math';
 import { extractParameters } from '@/lib/math-engine/parser';
 
-// Default page load: Single cartesian graph y = f(x)
+
 const INITIAL_EXPRESSIONS: MathExpression[] = [
   {
     id: '1',
@@ -35,16 +35,16 @@ const DEFAULT_VIEWPORT: Viewport = {
 };
 
 export default function Home() {
-  const [expressions, setExpressions] = useState<MathExpression[]>(INITIAL_EXPRESSIONS);
-  const [viewport, setViewport] = useState<Viewport>(DEFAULT_VIEWPORT);
-  const [isDarkTheme, setIsDarkTheme] = useState<boolean>(true);
-  const [analyses, setAnalyses] = useState<Record<string, AnalysisResult>>({});
-  const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(null);
-  const [isTableOpen, setIsTableOpen] = useState<boolean>(false);
-  const [tableExpressionId, setTableExpressionId] = useState<string | null>(null);
+  const [expressions, setExpressions] = React.useState<MathExpression[]>(INITIAL_EXPRESSIONS);
+  const [viewport, setViewport] = React.useState<Viewport>(DEFAULT_VIEWPORT);
+  const [isDarkTheme, setIsDarkTheme] = React.useState<boolean>(true);
+  const [analyses, setAnalyses] = React.useState<Record<string, AnalysisResult>>({});
+  const [selectedAnalysisId, setSelectedAnalysisId] = React.useState<string | null>(null);
+  const [isTableOpen, setIsTableOpen] = React.useState<boolean>(false);
+  const [tableExpressionId, setTableExpressionId] = React.useState<string | null>(null);
 
   // Dynamic parameters state (a, b, c, k, m)
-  const [parameters, setParameters] = useState<Record<string, number>>({
+  const [parameters, setParameters] = React.useState<Record<string, number>>({
     a: 1,
     b: 1,
     c: 0,
@@ -53,7 +53,7 @@ export default function Home() {
   });
 
   // Definite Integral & Riemann Sums state
-  const [integralConfig, setIntegralConfig] = useState<IntegralConfig>({
+  const [integralConfig, setIntegralConfig] = React.useState<IntegralConfig>({
     enabled: false,
     expressionId: '1',
     a: 0,
@@ -61,10 +61,10 @@ export default function Home() {
     method: 'exact',
     n: 10,
   });
-  const [isIntegralOpen, setIsIntegralOpen] = useState<boolean>(false);
+  const [isIntegralOpen, setIsIntegralOpen] = React.useState<boolean>(false);
 
   // Detect active parameters across visible expressions
-  const detectedParams = useMemo(() => {
+  const detectedParams = React.useMemo(() => {
     const found = new Set<string>();
     expressions.forEach((expr) => {
       if (expr.visible) {
@@ -75,16 +75,16 @@ export default function Home() {
     return Array.from(found);
   }, [expressions]);
 
-  const handleParameterChange = useCallback((name: string, val: number) => {
+  const handleParameterChange = React.useCallback((name: string, val: number) => {
     setParameters((prev) => ({ ...prev, [name]: val }));
   }, []);
 
-  const handleParameterReset = useCallback((name: string) => {
+  const handleParameterReset = React.useCallback((name: string) => {
     setParameters((prev) => ({ ...prev, [name]: name === 'c' ? 0 : 1 }));
   }, []);
 
   // Memoized analysis update to prevent React render loops
-  const handleAnalysisUpdate = useCallback((newAnalyses: Record<string, AnalysisResult>) => {
+  const handleAnalysisUpdate = React.useCallback((newAnalyses: Record<string, AnalysisResult>) => {
     setAnalyses(newAnalyses);
   }, []);
 
@@ -264,6 +264,8 @@ export default function Home() {
 
   const selectedExpression = expressions.find((e) => e.id === selectedAnalysisId);
   const selectedAnalysis = selectedAnalysisId ? analyses[selectedAnalysisId] : null;
+
+
 
   return (
     <div className="flex flex-col h-screen w-screen bg-zinc-950 font-sans overflow-hidden">

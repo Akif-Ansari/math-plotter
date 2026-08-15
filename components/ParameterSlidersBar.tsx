@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import { Sliders, Play, Pause, RotateCcw } from 'lucide-react';
 
 interface ParameterSlidersBarProps {
@@ -16,12 +16,12 @@ export default function ParameterSlidersBar({
   onResetParameter,
   detectedParams,
 }: ParameterSlidersBarProps) {
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const animFrameRef = useRef<number | null>(null);
-  const timeRef = useRef<number>(0);
+  const [isPlaying, setIsPlaying] = React.useState<boolean>(false);
+  const animFrameRef = React.useRef<number | null>(null);
+  const timeRef = React.useRef<number>(0);
 
   // Animation Loop for play/pause mode
-  useEffect(() => {
+  React.useEffect(() => {
     if (!isPlaying || detectedParams.length === 0) {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
       return;

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import katex from 'katex';
 
 interface KaTeXRendererProps {
@@ -14,9 +14,15 @@ export default function KaTeXRenderer({
   displayMode = false,
   className = '',
 }: KaTeXRendererProps) {
-  const containerRef = useRef<HTMLSpanElement>(null);
+  const containerRef = React.useRef<HTMLSpanElement>(null);
+  const [isMounted, setIsMounted] = React.useState<boolean>(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  React.useEffect(() => {
+    if (!isMounted) return;
     if (containerRef.current) {
       try {
         katex.render(latex, containerRef.current, {
@@ -29,7 +35,7 @@ export default function KaTeXRenderer({
         }
       }
     }
-  }, [latex, displayMode]);
+  }, [latex, displayMode, isMounted]);
 
-  return <span ref={containerRef} className={`inline-block ${className}`} />;
+  return <span ref={containerRef} className={`inline-block ${className}`} suppressHydrationWarning />;
 }
