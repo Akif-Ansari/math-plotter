@@ -27,13 +27,8 @@ export default function GraphCanvas({
   integralConfig,
   onOpenIntegralModal,
 }: GraphCanvasProps) {
-  const [isMounted, setIsMounted] = React.useState(false);
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const lastAnalysisRef = React.useRef<string>('');
-
-  React.useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   const viewportRef = React.useRef(viewport);
   React.useEffect(() => {
@@ -148,9 +143,11 @@ export default function GraphCanvas({
   }, [expressions, viewport, onAnalysisUpdate]);
 
   React.useEffect(() => {
-    if (!isMounted) return;
-    computeAllSnapPoints();
-  }, [isMounted, computeAllSnapPoints]);
+    const timer = setTimeout(() => {
+      computeAllSnapPoints();
+    }, 40);
+    return () => clearTimeout(timer);
+  }, [computeAllSnapPoints]);
 
   // Main Canvas Render Loop
   const renderCanvas = React.useCallback(() => {
@@ -743,35 +740,42 @@ export default function GraphCanvas({
   }
   }, [viewport, expressions, snapPoints, hoverInfo, isDarkTheme, isTangentMode, tangentInfo, parameters, integralConfig]);
 
+  // Schedule frame render with requestAnimationFrame
   React.useEffect(() => {
-    if (!isMounted) return;
-    renderCanvas();
-  }, [isMounted, renderCanvas]);
+    const animId = requestAnimationFrame(() => {
+      renderCanvas();
+    });
+    return () => cancelAnimationFrame(animId);
+  }, [renderCanvas]);
 
   React.useEffect(() => {
-    if (!isMounted) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const handleResize = () => renderCanvas();
+    let animId: number | null = null;
+    const scheduleRender = () => {
+      if (animId !== null) cancelAnimationFrame(animId);
+      animId = requestAnimationFrame(() => {
+        renderCanvas();
+      });
+    };
+
+    const handleResize = () => scheduleRender();
     window.addEventListener('resize', handleResize);
 
     const observer = new ResizeObserver(() => {
-      renderCanvas();
+      scheduleRender();
     });
-    observer.observe(canvas);
     if (canvas.parentElement) {
       observer.observe(canvas.parentElement);
     }
 
-    // Trigger immediate frame draw once canvas layout mounts
-    renderCanvas();
-
     return () => {
+      if (animId !== null) cancelAnimationFrame(animId);
       window.removeEventListener('resize', handleResize);
       observer.disconnect();
     };
-  }, [isMounted, renderCanvas]);
+  }, [renderCanvas]);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     isDragging.current = true;
@@ -917,7 +921,6 @@ export default function GraphCanvas({
 
   // Attach non-passive wheel, touch, and gesture listeners directly to canvas element
   React.useEffect(() => {
-    if (!isMounted) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -1053,7 +1056,7 @@ export default function GraphCanvas({
       canvas.removeEventListener('gesturechange', handleGestureNative);
       canvas.removeEventListener('gestureend', handleGestureNative);
     };
-  }, [isMounted, applyFocalZoomAndPan]);
+  }, [applyFocalZoomAndPan]);
 
   const applyZoom = (factor: number) => {
     const canvas = canvasRef.current;
