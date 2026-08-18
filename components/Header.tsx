@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { RotateCcw, Download, Sun, Moon, Table as TableIcon, Sigma, MoreVertical, X } from 'lucide-react';
+import Dropdown, { DropdownOption } from './Dropdown';
+import { RotateCcw, Download, Sun, Moon, Table as TableIcon, Sigma, MoreVertical, X, Sparkles, FunctionSquare, Waves, Infinity as InfinityIcon, Orbit, CircleDot } from 'lucide-react';
 
 interface HeaderProps {
   onResetView: () => void;
@@ -12,6 +13,39 @@ interface HeaderProps {
   onOpenTable?: () => void;
   onOpenIntegral?: () => void;
 }
+
+const PRESET_OPTIONS: DropdownOption<string>[] = [
+  {
+    value: 'prompt',
+    label: 'Default Presets',
+    description: 'Parabola, Sine Wave, & Polar Spiral',
+    icon: <Waves className="w-4 h-4 text-[#1DB954]" />,
+  },
+  {
+    value: 'calculus',
+    label: 'Calculus & Roots',
+    description: 'Polynomials (x³ - 3x, x² - 4)',
+    icon: <FunctionSquare className="w-4 h-4 text-emerald-400" />,
+  },
+  {
+    value: 'asymptotes',
+    label: 'Asymptotes & Rational',
+    description: 'Rational & Trig (1/x, tan x)',
+    icon: <InfinityIcon className="w-4 h-4 text-cyan-400" />,
+  },
+  {
+    value: 'polar',
+    label: 'Polar Curves',
+    description: 'Cardioid & Rose Spirals',
+    icon: <Orbit className="w-4 h-4 text-violet-400" />,
+  },
+  {
+    value: 'conics',
+    label: 'Conic Sections & Circles',
+    description: 'Parametric circle & Parabola',
+    icon: <CircleDot className="w-4 h-4 text-amber-400" />,
+  },
+];
 
 export default function Header({
   onResetView,
@@ -61,29 +95,16 @@ export default function Header({
 
       {/* Desktop Controls (hidden on mobile) */}
       <div className="hidden md:flex items-center gap-2">
-        <div className="relative">
-          <select
-            onChange={(e) => e.target.value && onSelectPreset(e.target.value)}
-            defaultValue=""
-            className={`text-sm font-medium px-5 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#1DB954] cursor-pointer shadow-sm transition ${
-              isDarkTheme
-                ? "bg-zinc-800 hover:bg-zinc-750 text-zinc-200 border-zinc-700"
-                : "bg-zinc-100 hover:bg-zinc-200/85 text-zinc-800 border-zinc-300"
-            }`}
-          >
-            <option value="" disabled>
-              ✨ Load Function Presets...
-            </option>
-            <option value="prompt">
-              Default Presets (Parabola, Sine, Spiral)
-            </option>
-            <option value="calculus">Calculus &amp; Roots (Polynomials)</option>
-            <option value="asymptotes">
-              Asymptotes &amp; Rational (1/x, tan x)
-            </option>
-            <option value="polar">Polar Curves (Cardioid &amp; Spirals)</option>
-            <option value="conics">Conic Sections &amp; Circles</option>
-          </select>
+        <div className="relative w-56">
+          <Dropdown
+            options={PRESET_OPTIONS}
+            placeholder="Load Preset..."
+            icon={<Sparkles className="w-3.5 h-3.5" />}
+            onChange={(val) => onSelectPreset(val)}
+            isDarkTheme={isDarkTheme}
+            size="sm"
+            fullWidth
+          />
         </div>
 
         {onOpenTable && (
@@ -223,32 +244,21 @@ export default function Header({
             <div className="p-2 space-y-1">
               {/* Presets */}
               <div className="px-3 py-2">
-                <label className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">
+                <label className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider mb-1 block">
                   Presets
                 </label>
-                <select
-                  onChange={(e) => {
-                    if (e.target.value) {
-                      onSelectPreset(e.target.value);
-                      setMenuOpen(false);
-                    }
+                <Dropdown
+                  options={PRESET_OPTIONS}
+                  placeholder="Choose a preset…"
+                  icon={<Sparkles className="w-3.5 h-3.5" />}
+                  onChange={(val) => {
+                    onSelectPreset(val);
+                    setMenuOpen(false);
                   }}
-                  defaultValue=""
-                  className={`mt-1 w-full text-xs px-3 py-2 rounded-lg border focus:outline-none focus:border-[#1DB954] ${
-                    isDarkTheme
-                      ? "bg-zinc-800 text-zinc-200 border-zinc-700"
-                      : "bg-zinc-100 text-zinc-800 border-zinc-300"
-                  }`}
-                >
-                  <option value="" disabled>
-                    Choose a preset…
-                  </option>
-                  <option value="prompt">Parabola, Sine, Spiral</option>
-                  <option value="calculus">Calculus &amp; Roots</option>
-                  <option value="asymptotes">Asymptotes &amp; Rational</option>
-                  <option value="polar">Polar Curves</option>
-                  <option value="conics">Conic Sections</option>
-                </select>
+                  isDarkTheme={isDarkTheme}
+                  size="sm"
+                  fullWidth
+                />
               </div>
 
               {onOpenTable && (

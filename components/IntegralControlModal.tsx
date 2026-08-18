@@ -3,6 +3,7 @@
 import React from 'react';
 import { MathExpression, IntegralConfig } from '@/types/math';
 import { compileExpression } from '@/lib/math-engine/parser';
+import Dropdown, { DropdownOption } from './Dropdown';
 import { X, Activity, Check } from 'lucide-react';
 
 interface IntegralControlModalProps {
@@ -29,6 +30,40 @@ export default function IntegralControlModal({
 
   const primaryExpr = visibleCartesian.find((e) => e.id === config.expressionId) || visibleCartesian[0];
   const secondaryExpr = visibleCartesian.find((e) => e.id === config.expressionId2);
+
+  const primaryOptions: DropdownOption<string>[] = React.useMemo(
+    () =>
+      visibleCartesian.map((expr) => ({
+        value: expr.id,
+        label: expr.label ? `${expr.label} (${expr.rawText})` : `f(x) = ${expr.rawText}`,
+        icon: (
+          <span
+            className="w-2.5 h-2.5 rounded-full inline-block flex-shrink-0"
+            style={{ backgroundColor: expr.color }}
+          />
+        ),
+      })),
+    [visibleCartesian]
+  );
+
+  const secondaryOptions: DropdownOption<string>[] = React.useMemo(
+    () => [
+      { value: '', label: 'None (Integrate relative to X-Axis)' },
+      ...visibleCartesian
+        .filter((e) => e.id !== config.expressionId)
+        .map((expr) => ({
+          value: expr.id,
+          label: expr.label ? `${expr.label} (${expr.rawText})` : `g(x) = ${expr.rawText}`,
+          icon: (
+            <span
+              className="w-2.5 h-2.5 rounded-full inline-block flex-shrink-0"
+              style={{ backgroundColor: expr.color }}
+            />
+          ),
+        })),
+    ],
+    [visibleCartesian, config.expressionId]
+  );
 
   // Numerical Integration calculations
   const integrationData = React.useMemo(() => {
@@ -162,19 +197,14 @@ export default function IntegralControlModal({
               <label className={`text-xs font-medium block mb-1.5 ${isDarkTheme ? 'text-zinc-300' : 'text-zinc-700'}`}>
                 Primary Function f(x)
               </label>
-              <select
+              <Dropdown<string>
                 value={config.expressionId}
-                onChange={(e) => onChangeConfig({ ...config, expressionId: e.target.value })}
-                className={`w-full border text-xs rounded-lg p-2.5 focus:outline-none focus:border-[#1DB954] ${
-                  isDarkTheme ? 'bg-zinc-800 border-zinc-700 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-900'
-                }`}
-              >
-                {visibleCartesian.map((expr) => (
-                  <option key={expr.id} value={expr.id}>
-                    {expr.label ? `${expr.label} (${expr.rawText})` : `f(x) = ${expr.rawText}`}
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => onChangeConfig({ ...config, expressionId: val })}
+                options={primaryOptions}
+                isDarkTheme={isDarkTheme}
+                size="sm"
+                fullWidth
+              />
             </div>
 
             {/* Secondary Function (Area Between Curves) */}
@@ -182,24 +212,16 @@ export default function IntegralControlModal({
               <label className={`text-xs font-medium block mb-1.5 ${isDarkTheme ? 'text-zinc-300' : 'text-zinc-700'}`}>
                 Subtract g(x) (Area Between Curves)
               </label>
-              <select
+              <Dropdown<string>
                 value={config.expressionId2 || ''}
-                onChange={(e) =>
-                  onChangeConfig({ ...config, expressionId2: e.target.value || null })
+                onChange={(val) =>
+                  onChangeConfig({ ...config, expressionId2: val || null })
                 }
-                className={`w-full border text-xs rounded-lg p-2.5 focus:outline-none focus:border-[#1DB954] ${
-                  isDarkTheme ? 'bg-zinc-800 border-zinc-700 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-900'
-                }`}
-              >
-                <option value="">None (Integrate relative to X-Axis)</option>
-                {visibleCartesian
-                  .filter((e) => e.id !== config.expressionId)
-                  .map((expr) => (
-                    <option key={expr.id} value={expr.id}>
-                      {expr.label ? `${expr.label} (${expr.rawText})` : `g(x) = ${expr.rawText}`}
-                    </option>
-                  ))}
-              </select>
+                options={secondaryOptions}
+                isDarkTheme={isDarkTheme}
+                size="sm"
+                fullWidth
+              />
             </div>
           </div>
 

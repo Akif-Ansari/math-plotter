@@ -3,6 +3,7 @@
 import React from 'react';
 import { MathExpression, Viewport } from '@/types/math';
 import { compileExpression } from '@/lib/math-engine/parser';
+import Dropdown, { DropdownOption } from './Dropdown';
 import { X, Download, Copy, Check, Table as TableIcon } from 'lucide-react';
 
 interface TableModalProps {
@@ -12,6 +13,14 @@ interface TableModalProps {
   onClose: () => void;
   isDarkTheme?: boolean;
 }
+
+const STEP_OPTIONS: DropdownOption<number>[] = [
+  { value: 0.1, label: '0.1' },
+  { value: 0.25, label: '0.25' },
+  { value: 0.5, label: '0.5' },
+  { value: 1.0, label: '1.0' },
+  { value: 2.0, label: '2.0' },
+];
 
 export default function TableModal({
   expressions,
@@ -48,6 +57,20 @@ export default function TableModal({
     }
     return visibleExprs.filter((e) => e.id === selectedExprId);
   }, [visibleExprs, selectedExprId]);
+
+  const functionOptions: DropdownOption<string>[] = React.useMemo(() => [
+    { value: 'all', label: 'All Visible Cartesian Functions' },
+    ...visibleExprs.map((expr) => ({
+      value: expr.id,
+      label: expr.label ? `${expr.label} (${expr.rawText})` : `f(x) = ${expr.rawText}`,
+      icon: (
+        <span
+          className="w-2.5 h-2.5 rounded-full inline-block flex-shrink-0"
+          style={{ backgroundColor: expr.color }}
+        />
+      ),
+    })),
+  ], [visibleExprs]);
 
   // Generate compiled evaluation functions
   const compiledFns = React.useMemo(() => {
@@ -165,24 +188,18 @@ export default function TableModal({
         }`}>
           <div className="flex flex-wrap gap-4 items-center">
             {/* Function Select */}
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1 w-52 sm:w-64">
               <label className={`text-[11px] font-medium uppercase tracking-wider ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 Function
               </label>
-              <select
+              <Dropdown<string>
                 value={selectedExprId}
-                onChange={(e) => setSelectedExprId(e.target.value)}
-                className={`border text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-[#1DB954] ${
-                  isDarkTheme ? 'bg-zinc-800 border-zinc-700 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-900'
-                }`}
-              >
-                <option value="all">All Visible Cartesian Functions</option>
-                {visibleExprs.map((expr) => (
-                  <option key={expr.id} value={expr.id}>
-                    {expr.label ? `${expr.label} (${expr.rawText})` : expr.rawText}
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => setSelectedExprId(val)}
+                options={functionOptions}
+                isDarkTheme={isDarkTheme}
+                size="sm"
+                fullWidth
+              />
             </div>
 
             {/* Start X */}
@@ -220,19 +237,14 @@ export default function TableModal({
               <label className={`text-[11px] font-medium uppercase tracking-wider ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 Step (Δx)
               </label>
-              <select
+              <Dropdown<number>
                 value={stepVal}
-                onChange={(e) => setStepVal(parseFloat(e.target.value))}
-                className={`border text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-[#1DB954] ${
-                  isDarkTheme ? 'bg-zinc-800 border-zinc-700 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-900'
-                }`}
-              >
-                <option value={0.1}>0.1</option>
-                <option value={0.25}>0.25</option>
-                <option value={0.5}>0.5</option>
-                <option value={1}>1.0</option>
-                <option value={2}>2.0</option>
-              </select>
+                onChange={(val) => setStepVal(val)}
+                options={STEP_OPTIONS}
+                isDarkTheme={isDarkTheme}
+                size="sm"
+                fullWidth
+              />
             </div>
           </div>
 

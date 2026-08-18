@@ -3,6 +3,7 @@
 import React from 'react';
 import { MathExpression, MathFunctionType, LineStyleType, AnalysisResult } from '@/types/math';
 import KaTeXRenderer from './KaTeXRenderer';
+import Dropdown, { DropdownOption } from './Dropdown';
 import {
   Plus,
   Trash2,
@@ -30,6 +31,27 @@ interface ExpressionListProps {
   analyses: Record<string, AnalysisResult>;
   isDarkTheme?: boolean;
 }
+
+const FUNCTION_TYPE_OPTIONS: DropdownOption<MathFunctionType>[] = [
+  { value: 'cartesian', label: 'y = f(x)', description: 'Standard Cartesian' },
+  { value: 'implicit', label: 'Implicit', description: 'F(x, y) = 0 Relation' },
+  { value: 'x_of_y', label: 'x = f(y)', description: 'Horizontal Cartesian' },
+  { value: 'polar', label: 'r = f(θ)', description: 'Polar Coordinates' },
+  { value: 'parametric', label: 'Parametric', description: 'x(t), y(t) Curve' },
+];
+
+const LINE_STYLE_OPTIONS: DropdownOption<LineStyleType>[] = [
+  { value: 'solid', label: 'Solid (━)' },
+  { value: 'dashed', label: 'Dashed (╌)' },
+  { value: 'dotted', label: 'Dotted (┈)' },
+];
+
+const LINE_WIDTH_OPTIONS: DropdownOption<number>[] = [
+  { value: 1.5, label: 'Thin (1.5px)' },
+  { value: 2.5, label: 'Normal (2.5px)' },
+  { value: 4, label: 'Thick (4.0px)' },
+  { value: 6, label: 'Bold (6.0px)' },
+];
 
 const PRESET_COLORS = [
   '#1DB954', // Electric Green
@@ -193,25 +215,19 @@ export default function ExpressionList({
                   </div>
 
                   {/* Function Type Selector */}
-                  <select
-                    value={expr.type}
-                    onChange={(e) =>
-                      onUpdateExpression(expr.id, {
-                        type: e.target.value as MathFunctionType,
-                      })
-                    }
-                    className={`text-[10px] sm:text-[11px] font-mono px-1.5 sm:px-2 py-0.5 rounded border focus:outline-none focus:border-[#1DB954] max-w-[95px] sm:max-w-[120px] truncate ${
-                      isDarkTheme
-                        ? 'bg-zinc-800 text-zinc-300 border-zinc-700'
-                        : 'bg-zinc-100 text-zinc-800 border-zinc-300'
-                    }`}
-                  >
-                    <option value="cartesian">y = f(x)</option>
-                    <option value="implicit">Implicit</option>
-                    <option value="x_of_y">x = f(y)</option>
-                    <option value="polar">r = f(θ)</option>
-                    <option value="parametric">Parametric</option>
-                  </select>
+                  <div className="w-24 sm:w-28 flex-shrink-0">
+                    <Dropdown<MathFunctionType>
+                      value={expr.type}
+                      onChange={(newType) =>
+                        onUpdateExpression(expr.id, { type: newType })
+                      }
+                      options={FUNCTION_TYPE_OPTIONS}
+                      isDarkTheme={isDarkTheme}
+                      size="xs"
+                      variant="compact"
+                      fullWidth
+                    />
+                  </div>
 
                   <span className={`text-[10px] font-mono px-1 py-0.5 rounded border flex-shrink-0 ${
                     isDarkTheme ? 'text-zinc-500 bg-zinc-900/80 border-zinc-800' : 'text-zinc-600 bg-zinc-100 border-zinc-200'
@@ -345,47 +361,34 @@ export default function ExpressionList({
                       <label className={`text-[10px] font-medium block mb-1 ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-600'}`}>
                         Line Style
                       </label>
-                      <select
+                      <Dropdown<LineStyleType>
                         value={expr.lineStyle || 'solid'}
-                        onChange={(e) =>
-                          onUpdateExpression(expr.id, {
-                            lineStyle: e.target.value as LineStyleType,
-                          })
+                        onChange={(val) =>
+                          onUpdateExpression(expr.id, { lineStyle: val })
                         }
-                        className={`w-full text-[11px] px-1.5 py-1 rounded border focus:outline-none focus:border-[#1DB954] truncate ${
-                          isDarkTheme
-                            ? 'bg-zinc-950 text-zinc-300 border-zinc-700/80'
-                            : 'bg-white text-zinc-800 border-zinc-300'
-                        }`}
-                      >
-                        <option value="solid">Solid (━)</option>
-                        <option value="dashed">Dashed (╌)</option>
-                        <option value="dotted">Dotted (┈)</option>
-                      </select>
+                        options={LINE_STYLE_OPTIONS}
+                        isDarkTheme={isDarkTheme}
+                        size="xs"
+                        variant="compact"
+                        fullWidth
+                      />
                     </div>
 
                     <div className="min-w-0">
                       <label className={`text-[10px] font-medium block mb-1 ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-600'}`}>
                         Thickness
                       </label>
-                      <select
+                      <Dropdown<number>
                         value={expr.lineWidth || 2.5}
-                        onChange={(e) =>
-                          onUpdateExpression(expr.id, {
-                            lineWidth: parseFloat(e.target.value),
-                          })
+                        onChange={(val) =>
+                          onUpdateExpression(expr.id, { lineWidth: val })
                         }
-                        className={`w-full text-[11px] px-1.5 py-1 rounded border focus:outline-none focus:border-[#1DB954] truncate ${
-                          isDarkTheme
-                            ? 'bg-zinc-950 text-zinc-300 border-zinc-700/80'
-                            : 'bg-white text-zinc-800 border-zinc-300'
-                        }`}
-                      >
-                        <option value={1.5}>Thin (1.5px)</option>
-                        <option value={2.5}>Normal (2.5px)</option>
-                        <option value={4}>Thick (4.0px)</option>
-                        <option value={6}>Bold (6.0px)</option>
-                      </select>
+                        options={LINE_WIDTH_OPTIONS}
+                        isDarkTheme={isDarkTheme}
+                        size="xs"
+                        variant="compact"
+                        fullWidth
+                      />
                     </div>
                   </div>
 
