@@ -77,9 +77,10 @@ export default function Dropdown<T extends string | number = string>({
     };
   }, [isOpen]);
 
-  // Determine dropdown placement (upward vs downward)
-  React.useEffect(() => {
-    if (isOpen && containerRef.current) {
+  // Handle open dropdown and calculate placement
+  const handleOpenDropdown = () => {
+    if (disabled) return;
+    if (containerRef.current) {
       if (menuPlacement === 'top') {
         setOpenUpward(true);
       } else if (menuPlacement === 'bottom') {
@@ -90,11 +91,11 @@ export default function Dropdown<T extends string | number = string>({
         const estimatedHeight = Math.min(options.length * 36 + 20, 260);
         setOpenUpward(spaceBelow < estimatedHeight && rect.top > estimatedHeight);
       }
-
       const selectedIdx = options.findIndex((opt) => opt.value === value);
       setHighlightedIndex(selectedIdx >= 0 ? selectedIdx : 0);
     }
-  }, [isOpen, menuPlacement, options, value]);
+    setIsOpen((prev) => !prev);
+  };
 
   // Keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -103,7 +104,7 @@ export default function Dropdown<T extends string | number = string>({
     if (!isOpen) {
       if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault();
-        setIsOpen(true);
+        handleOpenDropdown();
       }
       return;
     }
@@ -202,7 +203,7 @@ export default function Dropdown<T extends string | number = string>({
       <button
         type="button"
         disabled={disabled}
-        onClick={() => !disabled && setIsOpen((prev) => !prev)}
+        onClick={handleOpenDropdown}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         className={`group flex items-center justify-between font-medium transition-all duration-150 cursor-pointer select-none focus:outline-none  ${fullWidth ? 'w-full' : ''

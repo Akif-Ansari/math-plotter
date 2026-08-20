@@ -2,7 +2,27 @@
 
 import React from 'react';
 import Dropdown, { DropdownOption } from './Dropdown';
-import { RotateCcw, Download, Sun, Moon, Table as TableIcon, Sigma, MoreVertical, X, Sparkles, FunctionSquare, Waves, Infinity as InfinityIcon, Orbit, CircleDot } from 'lucide-react';
+import {
+  RotateCcw,
+  Download,
+  Sun,
+  Moon,
+  Table as TableIcon,
+  Sigma,
+  MoreVertical,
+  X,
+  Sparkles,
+  FunctionSquare,
+  Waves,
+  Infinity as InfinityIcon,
+  Orbit,
+  CircleDot,
+  TrendingUp,
+  Activity,
+  BarChart3,
+  Layers,
+  Zap,
+} from 'lucide-react';
 
 interface HeaderProps {
   onResetView: () => void;
@@ -17,33 +37,63 @@ interface HeaderProps {
 const PRESET_OPTIONS: DropdownOption<string>[] = [
   {
     value: 'prompt',
-    label: 'Default Presets',
+    label: 'Standard Overview',
     description: 'Parabola, Sine Wave, & Polar Spiral',
     icon: <Waves className="w-4 h-4 text-[#1DB954]" />,
   },
   {
     value: 'calculus',
-    label: 'Calculus & Roots',
-    description: 'Polynomials (x³ - 3x, x² - 4)',
+    label: 'Calculus & Polynomials',
+    description: 'Cubic & quadratic roots/extrema',
     icon: <FunctionSquare className="w-4 h-4 text-emerald-400" />,
   },
   {
     value: 'asymptotes',
-    label: 'Asymptotes & Rational',
-    description: 'Rational & Trig (1/x, tan x)',
+    label: 'Rational & Asymptotes',
+    description: '1/x, tan(x), & rational poles',
     icon: <InfinityIcon className="w-4 h-4 text-cyan-400" />,
   },
   {
     value: 'polar',
-    label: 'Polar Curves',
-    description: 'Cardioid & Rose Spirals',
+    label: 'Polar Curves & Roses',
+    description: 'Cardioids, roses, & spirals',
     icon: <Orbit className="w-4 h-4 text-violet-400" />,
   },
   {
+    value: 'fourier',
+    label: 'Wave Harmonics & Fourier',
+    description: 'Fundamental & harmonic summation',
+    icon: <Activity className="w-4 h-4 text-blue-400" />,
+  },
+  {
+    value: 'growth',
+    label: 'Exponential & Logistic',
+    description: 'eˣ, ln(x), & sigmoid curves',
+    icon: <TrendingUp className="w-4 h-4 text-amber-400" />,
+  },
+  {
+    value: 'physics',
+    label: 'Damped Oscillations',
+    description: 'Underdamped wave & envelopes',
+    icon: <Zap className="w-4 h-4 text-rose-400" />,
+  },
+  {
+    value: 'statistics',
+    label: 'Probability Distributions',
+    description: 'Gaussian bell curve & Cauchy',
+    icon: <BarChart3 className="w-4 h-4 text-indigo-400" />,
+  },
+  {
+    value: 'parametric',
+    label: 'Parametric & Lissajous',
+    description: 'Lissajous knots & Astroid curves',
+    icon: <Layers className="w-4 h-4 text-teal-400" />,
+  },
+  {
     value: 'conics',
-    label: 'Conic Sections & Circles',
-    description: 'Parametric circle & Parabola',
-    icon: <CircleDot className="w-4 h-4 text-amber-400" />,
+    label: 'Conics & Circles',
+    description: 'Parametric ellipse & Parabola',
+    icon: <CircleDot className="w-4 h-4 text-emerald-400" />,
   },
 ];
 
@@ -204,7 +254,7 @@ export default function Header({
             <div className="absolute inset-0 bg-black/40 animate-fade-in" />
             {/* Menu */}
             <div
-              className={`absolute top-12 right-2 w-64 border rounded-xl shadow-2xl animate-slide-up overflow-hidden ${isDarkTheme
+              className={`absolute top-12 right-2 w-64 border rounded-xl shadow-2xl animate-slide-up ${isDarkTheme
                 ? "bg-zinc-900 border-zinc-700 text-white"
                 : "bg-white border-zinc-200 text-zinc-900"
                 }`}

@@ -1109,7 +1109,7 @@ export default function GraphCanvas({
               </span>
             </div>
             <div className="flex justify-between">
-              <span className={isDarkTheme ? 'text-zinc-500' : 'text-zinc-400'}>Slope f'(a):</span>
+              <span className={isDarkTheme ? 'text-zinc-500' : 'text-zinc-400'}>Slope f&apos;(a):</span>
               <span className="font-bold text-[#1DB954]">{tangentInfo.slope}</span>
             </div>
             <div className="flex justify-between">

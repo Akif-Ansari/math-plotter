@@ -164,6 +164,7 @@ export default function Home() {
         setExpressions([
           {
             id: 'c1',
+            label: 'Cubic Polynomial',
             latex: 'y = x^3 - 3x',
             rawText: 'x^3 - 3*x',
             color: '#1DB954',
@@ -172,9 +173,20 @@ export default function Home() {
           },
           {
             id: 'c2',
+            label: 'Quadratic',
             latex: 'y = x^2 - 4',
             rawText: 'x^2 - 4',
             color: '#006241',
+            visible: true,
+            type: 'cartesian',
+          },
+          {
+            id: 'c3',
+            label: 'Secant Line',
+            latex: 'y = 2x - 2',
+            rawText: '2 * x - 2',
+            color: '#3B82F6',
+            lineStyle: 'dashed',
             visible: true,
             type: 'cartesian',
           },
@@ -185,6 +197,7 @@ export default function Home() {
         setExpressions([
           {
             id: 'a1',
+            label: 'Hyperbola (1/x)',
             latex: 'y = 1 / x',
             rawText: '1 / x',
             color: '#1DB954',
@@ -193,9 +206,19 @@ export default function Home() {
           },
           {
             id: 'a2',
+            label: 'Tangent Curve',
             latex: 'y = \\tan(x)',
             rawText: 'tan(x)',
             color: '#006241',
+            visible: true,
+            type: 'cartesian',
+          },
+          {
+            id: 'a3',
+            label: 'Rational Function',
+            latex: 'y = (x^2 - 1)/(x^2 - 4)',
+            rawText: '(x^2 - 1) / (x^2 - 4)',
+            color: '#06B6D4',
             visible: true,
             type: 'cartesian',
           },
@@ -206,6 +229,7 @@ export default function Home() {
         setExpressions([
           {
             id: 'p1',
+            label: 'Cardioid',
             latex: 'r = 2(1 - \\cos\\theta)',
             rawText: '2 * (1 - cos(theta))',
             color: '#1DB954',
@@ -214,11 +238,197 @@ export default function Home() {
           },
           {
             id: 'p2',
+            label: 'Rose 4-Petal',
             latex: 'r = 3 \\sin(4\\theta)',
             rawText: '3 * sin(4 * theta)',
-            color: '#006241',
+            color: '#8B5CF6',
             visible: true,
             type: 'polar',
+          },
+          {
+            id: 'p3',
+            label: 'Archimedean Spiral',
+            latex: 'r = 0.5\\theta',
+            rawText: '0.5 * theta',
+            color: '#EC4899',
+            visible: true,
+            type: 'polar',
+          },
+        ]);
+        setViewport({ xMin: -6, xMax: 6, yMin: -6, yMax: 6 });
+        break;
+      case 'fourier':
+        setExpressions([
+          {
+            id: 'f1',
+            label: 'Fundamental Harmonic',
+            latex: 'y = 3\\sin(x)',
+            rawText: '3 * sin(x)',
+            color: '#3B82F6',
+            visible: true,
+            type: 'cartesian',
+          },
+          {
+            id: 'f2',
+            label: '3rd Harmonic',
+            latex: 'y = \\sin(3x)',
+            rawText: 'sin(3 * x)',
+            color: '#8B5CF6',
+            visible: true,
+            type: 'cartesian',
+          },
+          {
+            id: 'f3',
+            label: '5th Harmonic',
+            latex: 'y = 0.6\\sin(5x)',
+            rawText: '0.6 * sin(5 * x)',
+            color: '#F59E0B',
+            visible: true,
+            type: 'cartesian',
+          },
+          {
+            id: 'f4',
+            label: 'Fourier Summation',
+            latex: 'y = 3\\sin(x) + \\sin(3x) + 0.6\\sin(5x)',
+            rawText: '3 * sin(x) + sin(3 * x) + 0.6 * sin(5 * x)',
+            color: '#1DB954',
+            lineWidth: 3,
+            visible: true,
+            type: 'cartesian',
+          },
+        ]);
+        setViewport({ xMin: -8, xMax: 8, yMin: -6, yMax: 6 });
+        break;
+      case 'growth':
+        setExpressions([
+          {
+            id: 'g1',
+            label: 'Natural Exponential',
+            latex: 'y = e^x',
+            rawText: 'exp(x)',
+            color: '#3B82F6',
+            visible: true,
+            type: 'cartesian',
+          },
+          {
+            id: 'g2',
+            label: 'Natural Logarithm',
+            latex: 'y = \\ln(x)',
+            rawText: 'log(x)',
+            color: '#F59E0B',
+            visible: true,
+            type: 'cartesian',
+          },
+          {
+            id: 'g3',
+            label: 'Logistic Sigmoid',
+            latex: 'y = 6 / (1 + e^{-x}) - 3',
+            rawText: '6 / (1 + exp(-x)) - 3',
+            color: '#1DB954',
+            lineWidth: 3,
+            visible: true,
+            type: 'cartesian',
+          },
+        ]);
+        setViewport({ xMin: -6, xMax: 6, yMin: -6, yMax: 6 });
+        break;
+      case 'physics':
+        setExpressions([
+          {
+            id: 'ph1',
+            label: 'Underdamped Oscillator',
+            latex: 'y = 4e^{-0.2x}\\cos(2x)',
+            rawText: '4 * exp(-0.2 * x) * cos(2 * x)',
+            color: '#1DB954',
+            lineWidth: 3,
+            visible: true,
+            type: 'cartesian',
+          },
+          {
+            id: 'ph2',
+            label: 'Upper Decay Envelope',
+            latex: 'y = 4e^{-0.2x}',
+            rawText: '4 * exp(-0.2 * x)',
+            color: '#EF4444',
+            lineStyle: 'dashed',
+            lineWidth: 1.5,
+            visible: true,
+            type: 'cartesian',
+          },
+          {
+            id: 'ph3',
+            label: 'Lower Decay Envelope',
+            latex: 'y = -4e^{-0.2x}',
+            rawText: '-4 * exp(-0.2 * x)',
+            color: '#EF4444',
+            lineStyle: 'dashed',
+            lineWidth: 1.5,
+            visible: true,
+            type: 'cartesian',
+          },
+        ]);
+        setViewport({ xMin: -1, xMax: 15, yMin: -5, yMax: 5 });
+        break;
+      case 'statistics':
+        setExpressions([
+          {
+            id: 'st1',
+            label: 'Gaussian Bell Curve',
+            latex: 'y = 4e^{-x^2 / 2}',
+            rawText: '4 * exp(-(x^2) / 2)',
+            color: '#1DB954',
+            lineWidth: 3,
+            visible: true,
+            type: 'cartesian',
+          },
+          {
+            id: 'st2',
+            label: 'Cauchy Distribution',
+            latex: 'y = 4 / (1 + x^2)',
+            rawText: '4 / (1 + x^2)',
+            color: '#3B82F6',
+            visible: true,
+            type: 'cartesian',
+          },
+          {
+            id: 'st3',
+            label: 'Laplace Distribution',
+            latex: 'y = 3e^{-|x|}',
+            rawText: '3 * exp(-abs(x))',
+            color: '#8B5CF6',
+            visible: true,
+            type: 'cartesian',
+          },
+        ]);
+        setViewport({ xMin: -5, xMax: 5, yMin: -1, yMax: 5 });
+        break;
+      case 'parametric':
+        setExpressions([
+          {
+            id: 'pr1',
+            label: 'Lissajous Knot (3:2)',
+            latex: 'x(t) = 4\\sin(3t), y(t) = 4\\cos(2t)',
+            rawText: '4*sin(3*t)',
+            parametricX: '4*sin(3*t)',
+            parametricY: '4*cos(2*t)',
+            color: '#1DB954',
+            visible: true,
+            type: 'parametric',
+            domainMin: 0,
+            domainMax: 6.283,
+          },
+          {
+            id: 'pr2',
+            label: 'Astroid Curve',
+            latex: 'x(t) = 3\\cos^3(t), y(t) = 3\\sin^3(t)',
+            rawText: '3*cos(t)^3',
+            parametricX: '3*cos(t)^3',
+            parametricY: '3*sin(t)^3',
+            color: '#EC4899',
+            visible: true,
+            type: 'parametric',
+            domainMin: 0,
+            domainMax: 6.283,
           },
         ]);
         setViewport({ xMin: -6, xMax: 6, yMin: -6, yMax: 6 });
@@ -227,21 +437,32 @@ export default function Home() {
         setExpressions([
           {
             id: 'cn1',
-            latex: 'x(t) = 4\\cos(t), y(t) = 4\\sin(t)',
-            rawText: '4*cos(t)',
-            parametricX: '4*cos(t)',
-            parametricY: '4*sin(t)',
+            label: 'Ellipse (5, 3)',
+            latex: 'x(t) = 5\\cos(t), y(t) = 3\\sin(t)',
+            rawText: '5*cos(t)',
+            parametricX: '5*cos(t)',
+            parametricY: '3*sin(t)',
             color: '#1DB954',
             visible: true,
             type: 'parametric',
             domainMin: 0,
-            domainMax: 6.28,
+            domainMax: 6.283,
           },
           {
             id: 'cn2',
-            latex: 'y = 0.5x^2',
-            rawText: '0.5 * x^2',
-            color: '#006241',
+            label: 'Parabola',
+            latex: 'y = 0.25x^2 - 3',
+            rawText: '0.25 * x^2 - 3',
+            color: '#3B82F6',
+            visible: true,
+            type: 'cartesian',
+          },
+          {
+            id: 'cn3',
+            label: 'Hyperbola Branch',
+            latex: 'y = \\sqrt{x^2 + 4}',
+            rawText: 'sqrt(x^2 + 4)',
+            color: '#F59E0B',
             visible: true,
             type: 'cartesian',
           },

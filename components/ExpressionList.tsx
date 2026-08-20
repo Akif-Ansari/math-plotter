@@ -10,7 +10,6 @@ import {
   Eye,
   EyeOff,
   BarChart2,
-  Calculator,
   ChevronLeft,
   ChevronRight,
   Sliders,
@@ -81,14 +80,13 @@ export default function ExpressionList({
   isDarkTheme = true,
 }: ExpressionListProps) {
   const [activeInputId, setActiveInputId] = React.useState<string | null>(null);
-  const [isCollapsed, setIsCollapsed] = React.useState<boolean>(false);
-  const [editingSettingsId, setEditingSettingsId] = React.useState<string | null>(null);
-
-  React.useEffect(() => {
-    if (typeof window !== 'undefined' && window.innerWidth < 768) {
-      setIsCollapsed(true);
+  const [isCollapsed, setIsCollapsed] = React.useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 768;
     }
-  }, []);
+    return false;
+  });
+  const [editingSettingsId, setEditingSettingsId] = React.useState<string | null>(null);
 
   if (isCollapsed) {
     return (

@@ -79,31 +79,37 @@ export function sanitizeMathString(input: string): string {
 
   // Replace common LaTeX symbols
   cleaned = cleaned
-    .replace(/\\sin/g, 'sin')
-    .replace(/\\cos/g, 'cos')
-    .replace(/\\tan/g, 'tan')
+    .replace(/\\exp\b/g, 'exp')
+    .replace(/\\sin\b/g, 'sin')
+    .replace(/\\cos\b/g, 'cos')
+    .replace(/\\tan\b/g, 'tan')
     .replace(/\\sqrt\{([^}]+)\}/g, 'sqrt($1)')
     .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '(($1)/($2))')
-    .replace(/\\pi/g, 'pi')
-    .replace(/\\theta/g, 'theta')
+    .replace(/\\pi\b/g, 'pi')
+    .replace(/\\theta\b/g, 'theta')
     .replace(/\\cdot/g, '*')
     .replace(/\\times/g, '*')
-    .replace(/\\ln/g, 'log') // math natural log
-    .replace(/\\log/g, 'log10')
+    .replace(/\\ln\b/g, 'log') // math natural log
+    .replace(/\\log\b/g, 'log10')
     .replace(/\^\{([^}]+)\}/g, '^($1)');
 
-  // Implicit multiplication inserts: e.g. 2x -> 2*x, 3y -> 3*y, 3sin -> 3*sin, x sin -> x*sin, 3(x) -> 3*(x)
+  // Implicit multiplication inserts:
+  // 1. Number followed by letter or (
   cleaned = cleaned
     .replace(/(\d+)([a-zA-Z])/g, '$1*$2')
     .replace(/(\d+)\(/g, '$1*(')
     .replace(/\)(\d+)/g, ')*$1')
-    .replace(/\)\(/g, ')*(')
-    .replace(/([xXyY])([a-zA-Z])/g, (match, p1, p2) => {
-      if (['s', 'c', 't', 'l', 'a', 'p'].includes(p2)) {
-        return `${p1}*${p2}`;
-      }
-      return match;
-    });
+    .replace(/\)\(/g, ')*(');
+
+  // 2. Closing parenthesis followed by function name or letter
+  cleaned = cleaned.replace(/\)([a-zA-Z])/g, ')*$1');
+
+  // 3. Variable (x, y, t, theta) followed by function or parenthesis
+  const funcs = 'sin|cos|tan|sec|csc|cot|asin|acos|atan|asec|acsc|acot|sinh|cosh|tanh|sqrt|cbrt|abs|exp|log|log10|ln|root|pi|e';
+  cleaned = cleaned.replace(new RegExp(`\\b([xXyYt]|theta)\\s*(?=\\b(${funcs})\\b|\\()`, 'gi'), '$1*');
+
+  // 4. Space between variable and next identifier (e.g., "x sin(x)" -> "x*sin(x)", "x exp(x)" -> "x*exp(x)")
+  cleaned = cleaned.replace(/\b([xXyYt]|theta)\s+([a-zA-Z])/gi, '$1*$2');
 
   return cleaned;
 }
@@ -127,27 +133,28 @@ export function sanitize2DMathString(input: string): string {
     .replace(/\\root\{([^}]+)\}/g, 'sqrt($1)');
 
   cleaned = cleaned
-    .replace(/\\sin/g, 'sin')
-    .replace(/\\cos/g, 'cos')
-    .replace(/\\tan/g, 'tan')
+    .replace(/\\exp\b/g, 'exp')
+    .replace(/\\sin\b/g, 'sin')
+    .replace(/\\cos\b/g, 'cos')
+    .replace(/\\tan\b/g, 'tan')
     .replace(/\\sqrt\{([^}]+)\}/g, 'sqrt($1)')
     .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '(($1)/($2))')
-    .replace(/\\pi/g, 'pi')
-    .replace(/\\ln/g, 'log')
-    .replace(/\\log/g, 'log10')
+    .replace(/\\pi\b/g, 'pi')
+    .replace(/\\ln\b/g, 'log')
+    .replace(/\\log\b/g, 'log10')
     .replace(/\^\{([^}]+)\}/g, '^($1)');
 
   cleaned = cleaned
     .replace(/(\d+)([a-zA-Z])/g, '$1*$2')
     .replace(/(\d+)\(/g, '$1*(')
     .replace(/\)(\d+)/g, ')*$1')
-    .replace(/\)\(/g, ')*(')
-    .replace(/([xXyY])([a-zA-Z])/g, (match, p1, p2) => {
-      if (['s', 'c', 't', 'l', 'a', 'p'].includes(p2)) {
-        return `${p1}*${p2}`;
-      }
-      return match;
-    });
+    .replace(/\)\(/g, ')*(');
+
+  cleaned = cleaned.replace(/\)([a-zA-Z])/g, ')*$1');
+
+  const funcs = 'sin|cos|tan|sec|csc|cot|asin|acos|atan|asec|acsc|acot|sinh|cosh|tanh|sqrt|cbrt|abs|exp|log|log10|ln|root|pi|e';
+  cleaned = cleaned.replace(new RegExp(`\\b([xXyYt]|theta)\\s*(?=\\b(${funcs})\\b|\\()`, 'gi'), '$1*');
+  cleaned = cleaned.replace(/\b([xXyYt]|theta)\s+([a-zA-Z])/gi, '$1*$2');
 
   return cleaned;
 }
@@ -180,9 +187,13 @@ function toNativeJsMath(sanitized: string): string {
   return js;
 }
 
+// Type definitions for compiled native evaluator functions
+type Compiled1DFn = (v: number, params?: Record<string, number>) => number;
+type Compiled2DFn = (x: number, y: number, params?: Record<string, number>) => number;
+
 // In-memory function cache for instant execution
-const native1DCache = new Map<string, Function>();
-const native2DCache = new Map<string, Function>();
+const native1DCache = new Map<string, Compiled1DFn>();
+const native2DCache = new Map<string, Compiled2DFn>();
 
 /**
  * Compiles a 1D mathematical string expression for variable 'x' or 'theta' or 't' or 'y'.
@@ -219,14 +230,15 @@ export function compileExpression(
           }
         }
       `
-      );
+      ) as Compiled1DFn;
       if (native1DCache.size > 300) native1DCache.clear();
       native1DCache.set(cacheKey, compiled);
     }
 
+    const fn = compiled;
     const evalFn: EvaluatorFn = (v: number) => {
       try {
-        const val = compiled!(v, params);
+        const val = fn(v, params);
         return typeof val === 'number' ? val : NaN;
       } catch {
         return NaN;
@@ -273,14 +285,15 @@ export function compile2DExpression(
           }
         }
       `
-      );
+      ) as Compiled2DFn;
       if (native2DCache.size > 300) native2DCache.clear();
       native2DCache.set(cacheKey, compiled);
     }
 
+    const fn = compiled;
     const evalFn: Evaluator2DFn = (x: number, y: number) => {
       try {
-        const val = compiled!(x, y, params);
+        const val = fn(x, y, params);
         return typeof val === 'number' ? val : NaN;
       } catch {
         return NaN;

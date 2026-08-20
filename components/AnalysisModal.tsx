@@ -218,7 +218,7 @@ export default function AnalysisModal({
                     <Spline className="w-4 h-4 text-[#1DB954]" />
                     <div>
                       <div className={`text-xs font-semibold ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                        First Derivative f'(x)
+                        First Derivative f&apos;(x)
                       </div>
                       <div className="text-xs font-mono text-[#1DB954] mt-0.5">{analysis.derivativeText}</div>
                     </div>
