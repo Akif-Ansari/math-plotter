@@ -45,6 +45,29 @@ export interface CriticalPointAnalysis {
   reason: string;
 }
 
+export interface InflectionPoint {
+  x: number;
+  y: number;
+  /** Whether concavity changes from up→down or down→up */
+  changeType: 'up-to-down' | 'down-to-up';
+}
+
+export interface ConcavityInterval {
+  from: number;
+  to: number;
+  direction: 'up' | 'down';
+  label: string;
+}
+
+export interface NumericalRootResult {
+  method: 'bisection' | 'newton' | 'secant';
+  root: number | null;
+  iterations: number;
+  converged: boolean;
+  error?: string;
+  steps: { iter: number; x: number; fx: number }[];
+}
+
 export interface PointCalculusReport {
   x: number;
   fX: string;
@@ -74,6 +97,8 @@ export interface AnalysisResult {
   isEvaluatable: boolean;
   error?: string;
   criticalPoints?: CriticalPointAnalysis[];
+  inflectionPoints?: InflectionPoint[];
+  concavityIntervals?: ConcavityInterval[];
 }
 
 export interface Viewport {

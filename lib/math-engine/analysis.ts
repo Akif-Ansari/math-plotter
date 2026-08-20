@@ -1,4 +1,4 @@
-import { Point2D, Asymptote, AnalysisResult, Viewport, CriticalPointAnalysis, PointCalculusReport } from '@/types/math';
+import { Point2D, Asymptote, AnalysisResult, Viewport, CriticalPointAnalysis, PointCalculusReport, InflectionPoint, ConcavityInterval, NumericalRootResult } from '@/types/math';
 import { compileExpression, getDerivativeText } from './parser';
 
 /**
@@ -205,6 +205,9 @@ export function analyzeFunction(
   // 5. Symbolic Derivative
   const derivText = getDerivativeText(rawText, 'x');
 
+  // 6. Inflection Points & Concavity (second derivative sign changes)
+  const { inflectionPoints, concavityIntervals } = analyzeInflectionAndConcavity(evalFn, xMin, xMax);
+
   return {
     expressionId,
     rawText,
@@ -218,6 +221,8 @@ export function analyzeFunction(
     derivativeText: derivText || undefined,
     isEvaluatable: true,
     criticalPoints,
+    inflectionPoints,
+    concavityIntervals,
   };
 }
 
@@ -508,4 +513,204 @@ export function findIntersections(
   }
 
   return intersections;
+}
+
+/**
+ * Detects inflection points (f''(x) sign changes) and labels concavity intervals.
+ */
+function analyzeInflectionAndConcavity(
+  evalFn: (x: number) => number,
+  xMin: number,
+  xMax: number
+): { inflectionPoints: InflectionPoint[]; concavityIntervals: ConcavityInterval[] } {
+  const h = 1e-4;
+  const SAMPLES = 800;
+  const step = (xMax - xMin) / SAMPLES;
+
+  const inflectionPoints: InflectionPoint[] = [];
+  const concavityIntervals: ConcavityInterval[] = [];
+
+  // Numerical second derivative: f''(x) ≈ (f(x+h) - 2f(x) + f(x-h)) / h^2
+  const d2 = (x: number): number | null => {
+    const fPlus = evalFn(x + h);
+    const fMid = evalFn(x);
+    const fMinus = evalFn(x - h);
+    if (!Number.isFinite(fPlus) || !Number.isFinite(fMid) || !Number.isFinite(fMinus)) return null;
+    return (fPlus - 2 * fMid + fMinus) / (h * h);
+  };
+
+  let prevX = xMin;
+  let prevD2 = d2(prevX);
+  let intervalStart = xMin;
+  let intervalDir: 'up' | 'down' | null = prevD2 === null ? null : prevD2 > 0 ? 'up' : 'down';
+
+  for (let i = 1; i <= SAMPLES; i++) {
+    const currX = xMin + i * step;
+    const currD2 = d2(currX);
+
+    if (prevD2 !== null && currD2 !== null && Math.abs(prevD2) < 1e6 && Math.abs(currD2) < 1e6) {
+      if (Math.sign(prevD2) !== Math.sign(currD2) && prevD2 !== 0) {
+        // Sign change: inflection point found
+        const infX = Number(((prevX + currX) / 2).toFixed(4));
+        const fVal = evalFn(infX);
+        if (Number.isFinite(fVal)) {
+          const changeType: InflectionPoint['changeType'] = prevD2 > 0 ? 'up-to-down' : 'down-to-up';
+          if (!inflectionPoints.some((ip) => Math.abs(ip.x - infX) < 0.05)) {
+            inflectionPoints.push({ x: infX, y: Number(fVal.toFixed(4)), changeType });
+          }
+          // Close previous concavity interval
+          const currDir = prevD2 > 0 ? 'up' : 'down';
+          if (intervalDir !== null && intervalStart < infX) {
+            concavityIntervals.push({
+              from: Number(intervalStart.toFixed(4)),
+              to: infX,
+              direction: intervalDir,
+              label: `(${intervalStart.toFixed(2)}, ${infX}) — Concave ${intervalDir === 'up' ? 'Up ∪' : 'Down ∩'}`,
+            });
+          }
+          intervalStart = infX;
+          intervalDir = currDir === 'up' ? 'down' : 'up';
+        }
+      }
+    }
+
+    prevX = currX;
+    prevD2 = currD2;
+  }
+
+  // Close last interval
+  if (intervalDir !== null && inflectionPoints.length > 0) {
+    concavityIntervals.push({
+      from: inflectionPoints[inflectionPoints.length - 1].x,
+      to: Number(xMax.toFixed(4)),
+      direction: intervalDir,
+      label: `(${inflectionPoints[inflectionPoints.length - 1].x}, ${xMax.toFixed(2)}) — Concave ${intervalDir === 'up' ? 'Up ∪' : 'Down ∩'}`,
+    });
+  }
+
+  if (inflectionPoints.length === 0 && prevD2 !== null) {
+    // No inflection: single concavity interval
+    concavityIntervals.push({
+      from: Number(xMin.toFixed(4)),
+      to: Number(xMax.toFixed(4)),
+      direction: prevD2 > 0 ? 'up' : 'down',
+      label: `(-∞, ∞) — Concave ${prevD2 > 0 ? 'Up ∪ (everywhere in viewport)' : 'Down ∩ (everywhere in viewport)'}`,
+    });
+  }
+
+  return { inflectionPoints, concavityIntervals };
+}
+
+/**
+ * Bisection Method: Finds root of f in [a, b] (requires f(a) * f(b) < 0).
+ */
+export function numericalBisection(
+  rawText: string,
+  a: number,
+  b: number,
+  maxIter = 40,
+  tol = 1e-8
+): NumericalRootResult {
+  const { evalFn, error } = compileExpression(rawText, 'x');
+  if (error || !evalFn) return { method: 'bisection', root: null, iterations: 0, converged: false, error: error || 'Parse error', steps: [] };
+
+  let fa = evalFn(a);
+  let fb = evalFn(b);
+  const steps: NumericalRootResult['steps'] = [];
+
+  if (!Number.isFinite(fa) || !Number.isFinite(fb)) {
+    return { method: 'bisection', root: null, iterations: 0, converged: false, error: 'f(a) or f(b) is not finite', steps: [] };
+  }
+  if (Math.sign(fa) === Math.sign(fb)) {
+    return { method: 'bisection', root: null, iterations: 0, converged: false, error: 'f(a) and f(b) must have opposite signs', steps: [] };
+  }
+
+  let mid = a;
+  let iter = 0;
+  for (; iter < maxIter; iter++) {
+    mid = (a + b) / 2;
+    const fmid = evalFn(mid);
+    steps.push({ iter: iter + 1, x: Number(mid.toFixed(8)), fx: Number(fmid.toFixed(8)) });
+    if (!Number.isFinite(fmid)) break;
+    if (Math.abs(fmid) < tol || (b - a) / 2 < tol) { iter++; break; }
+    if (Math.sign(fa) === Math.sign(fmid)) { a = mid; fa = fmid; } else { b = mid; }
+  }
+
+  const root = Number(mid.toFixed(8));
+  return { method: 'bisection', root, iterations: iter, converged: Math.abs(evalFn(root)) < tol * 10, steps };
+}
+
+/**
+ * Newton-Raphson Method: x_{n+1} = x_n - f(x_n) / f'(x_n).
+ */
+export function numericalNewton(
+  rawText: string,
+  x0: number,
+  maxIter = 40,
+  tol = 1e-8
+): NumericalRootResult {
+  const { evalFn, error } = compileExpression(rawText, 'x');
+  if (error || !evalFn) return { method: 'newton', root: null, iterations: 0, converged: false, error: error || 'Parse error', steps: [] };
+
+  const h = 1e-6;
+  const steps: NumericalRootResult['steps'] = [];
+  let x = x0;
+
+  for (let iter = 0; iter < maxIter; iter++) {
+    const fx = evalFn(x);
+    if (!Number.isFinite(fx)) break;
+    steps.push({ iter: iter + 1, x: Number(x.toFixed(8)), fx: Number(fx.toFixed(8)) });
+    if (Math.abs(fx) < tol) { break; }
+    const dfx = (evalFn(x + h) - evalFn(x - h)) / (2 * h);
+    if (Math.abs(dfx) < 1e-14) {
+      return { method: 'newton', root: null, iterations: iter + 1, converged: false, error: "Derivative ≈ 0, cannot continue", steps };
+    }
+    const xNew = x - fx / dfx;
+    if (!Number.isFinite(xNew)) break;
+    if (Math.abs(xNew - x) < tol) { x = xNew; steps.push({ iter: iter + 2, x: Number(x.toFixed(8)), fx: Number(evalFn(x).toFixed(8)) }); break; }
+    x = xNew;
+  }
+
+  const root = Number(x.toFixed(8));
+  const converged = Number.isFinite(evalFn(root)) && Math.abs(evalFn(root)) < tol * 100;
+  return { method: 'newton', root, iterations: steps.length, converged, steps };
+}
+
+/**
+ * Secant Method: Uses two initial points x0, x1.
+ */
+export function numericalSecant(
+  rawText: string,
+  x0: number,
+  x1: number,
+  maxIter = 40,
+  tol = 1e-8
+): NumericalRootResult {
+  const { evalFn, error } = compileExpression(rawText, 'x');
+  if (error || !evalFn) return { method: 'secant', root: null, iterations: 0, converged: false, error: error || 'Parse error', steps: [] };
+
+  const steps: NumericalRootResult['steps'] = [];
+  let xPrev = x0;
+  let xCurr = x1;
+  let fPrev = evalFn(xPrev);
+  let fCurr = evalFn(xCurr);
+
+  for (let iter = 0; iter < maxIter; iter++) {
+    if (!Number.isFinite(fCurr)) break;
+    steps.push({ iter: iter + 1, x: Number(xCurr.toFixed(8)), fx: Number(fCurr.toFixed(8)) });
+    if (Math.abs(fCurr) < tol) break;
+    const denom = fCurr - fPrev;
+    if (Math.abs(denom) < 1e-14) {
+      return { method: 'secant', root: null, iterations: iter + 1, converged: false, error: 'Division by zero in secant step', steps };
+    }
+    const xNext = xCurr - fCurr * (xCurr - xPrev) / denom;
+    if (!Number.isFinite(xNext)) break;
+    xPrev = xCurr; fPrev = fCurr;
+    xCurr = xNext; fCurr = evalFn(xCurr);
+    if (Math.abs(xCurr - xPrev) < tol) { steps.push({ iter: iter + 2, x: Number(xCurr.toFixed(8)), fx: Number(fCurr.toFixed(8)) }); break; }
+  }
+
+  const root = Number(xCurr.toFixed(8));
+  const converged = Number.isFinite(fCurr) && Math.abs(fCurr) < tol * 100;
+  return { method: 'secant', root, iterations: steps.length, converged, steps };
 }
