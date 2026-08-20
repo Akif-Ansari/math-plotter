@@ -1,4 +1,4 @@
-import { Point2D, Asymptote, AnalysisResult, Viewport } from '@/types/math';
+import { Point2D, Asymptote, AnalysisResult, Viewport, CriticalPointAnalysis, PointCalculusReport } from '@/types/math';
 import { compileExpression, getDerivativeText } from './parser';
 
 /**
@@ -23,6 +23,7 @@ export function analyzeFunction(
       asymptotes: [],
       isEvaluatable: false,
       error: error || 'Failed to parse function',
+      criticalPoints: [],
     };
   }
 
@@ -37,6 +38,7 @@ export function analyzeFunction(
   const roots: Point2D[] = [];
   const asymptotes: Asymptote[] = [];
   const extrema: Point2D[] = [];
+  const criticalPoints: CriticalPointAnalysis[] = [];
 
   const SAMPLES = 1000;
   const step = (xMax - xMin) / SAMPLES;
@@ -85,6 +87,12 @@ export function analyzeFunction(
             value: asympX,
             label: `x = ${asympX}`,
           });
+          criticalPoints.push({
+            x: asympX,
+            label: `x = ${asympX}`,
+            type: 'discontinuity',
+            reason: 'Vertical Asymptote / Infinite Discontinuity',
+          });
         }
       } else if (Math.sign(prevY) !== Math.sign(currY)) {
         // Root detection
@@ -102,13 +110,13 @@ export function analyzeFunction(
         }
       }
 
-      // Check for Extrema (Derivative sign change)
+      // Check for Extrema and Corners (Derivative sign change / sharp jump)
       if (i > 1 && i < SAMPLES - 1) {
         const nextX = currX + step;
         const nextY = evalFn(nextX);
         if (Number.isFinite(nextY) && !isNaN(nextY)) {
-          const dy1 = currY - prevY;
-          const dy2 = nextY - currY;
+          const dy1 = (currY - prevY) / step;
+          const dy2 = (nextY - currY) / step;
           if (Math.sign(dy1) !== Math.sign(dy2) && Math.abs(dy1) < 100 && Math.abs(dy2) < 100) {
             const formattedExtY = Number(currY.toFixed(4));
             extrema.push({
@@ -118,6 +126,19 @@ export function analyzeFunction(
 
             if (Math.abs(currY - minObservedY) < 0.1) minAchievedAtExtrema = true;
             if (Math.abs(currY - maxObservedY) < 0.1) maxAchievedAtExtrema = true;
+
+            // Check if this extremum is a non-differentiable corner (e.g. |x|)
+            if (Math.abs(dy1 - dy2) > 0.8 && Math.abs(dy1) > 0.2 && Math.abs(dy2) > 0.2) {
+              const cornerX = Number(currX.toFixed(4));
+              if (!criticalPoints.some((cp) => Math.abs(cp.x - cornerX) < 0.2)) {
+                criticalPoints.push({
+                  x: cornerX,
+                  label: `x = ${cornerX}`,
+                  type: 'non-differentiable',
+                  reason: 'Sharp Corner / Cusp (Left slope ≠ Right slope)',
+                });
+              }
+            }
           }
         }
       }
@@ -196,6 +217,107 @@ export function analyzeFunction(
     asymptotes,
     derivativeText: derivText || undefined,
     isEvaluatable: true,
+    criticalPoints,
+  };
+}
+
+/**
+ * Analyzes Continuity, Left/Right Limits, and Differentiability at a specific point x = c.
+ */
+export function analyzePointCalculus(
+  rawText: string,
+  c: number,
+  params: Record<string, number> = {}
+): PointCalculusReport {
+  const { evalFn, error } = compileExpression(rawText, 'x', params);
+  if (error || !evalFn) {
+    return {
+      x: c,
+      fX: 'Undefined',
+      leftLimit: 'Undefined',
+      rightLimit: 'Undefined',
+      limitValue: 'DNE',
+      limitExists: false,
+      isContinuous: false,
+      discontinuityType: error || 'Failed to parse function',
+      isDifferentiable: false,
+      nonDiffReason: error || 'Failed to parse function',
+    };
+  }
+
+  const h = 1e-6;
+  const fC = evalFn(c);
+  const isFcDefined = Number.isFinite(fC) && !isNaN(fC);
+
+  const fLeft = evalFn(c - h);
+  const fRight = evalFn(c + h);
+
+  const isLeftFinite = Number.isFinite(fLeft) && !isNaN(fLeft) && Math.abs(fLeft) < 1e5;
+  const isRightFinite = Number.isFinite(fRight) && !isNaN(fRight) && Math.abs(fRight) < 1e5;
+
+  const leftLimitStr = !Number.isFinite(fLeft) || isNaN(fLeft)
+    ? 'Undefined'
+    : Math.abs(fLeft) >= 1e5
+      ? (fLeft > 0 ? '+∞' : '-∞')
+      : Number(fLeft.toFixed(4)).toString();
+
+  const rightLimitStr = !Number.isFinite(fRight) || isNaN(fRight)
+    ? 'Undefined'
+    : Math.abs(fRight) >= 1e5
+      ? (fRight > 0 ? '+∞' : '-∞')
+      : Number(fRight.toFixed(4)).toString();
+
+  const limitExists = isLeftFinite && isRightFinite && Math.abs(fLeft - fRight) < 1e-3;
+  const limitValue = limitExists ? Number(((fLeft + fRight) / 2).toFixed(4)).toString() : 'DNE (Does Not Exist)';
+
+  let isContinuous = false;
+  let discontinuityType = 'None (Continuous)';
+
+  if (limitExists && isFcDefined && Math.abs((fLeft + fRight) / 2 - fC) < 1e-3) {
+    isContinuous = true;
+  } else if (!isLeftFinite || !isRightFinite) {
+    discontinuityType = 'Infinite / Essential Discontinuity (Vertical Asymptote)';
+  } else if (!limitExists) {
+    discontinuityType = 'Jump Discontinuity (Left Limit ≠ Right Limit)';
+  } else {
+    discontinuityType = 'Removable Discontinuity (Hole / Undefined at point)';
+  }
+
+  let isDifferentiable = false;
+  let nonDiffReason = 'None (Differentiable)';
+  let leftDerivative: string | undefined;
+  let rightDerivative: string | undefined;
+
+  if (isContinuous) {
+    const dLeft = (fC - evalFn(c - h)) / h;
+    const dRight = (evalFn(c + h) - fC) / h;
+    leftDerivative = Number.isFinite(dLeft) ? Number(dLeft.toFixed(4)).toString() : 'Undefined';
+    rightDerivative = Number.isFinite(dRight) ? Number(dRight.toFixed(4)).toString() : 'Undefined';
+
+    if (Math.abs(dLeft) > 1e4 || Math.abs(dRight) > 1e4) {
+      nonDiffReason = "Vertical Tangent (|f'(x)| → ∞)";
+    } else if (Math.abs(dLeft - dRight) < 0.05) {
+      isDifferentiable = true;
+    } else {
+      nonDiffReason = `Corner / Sharp Cusp (Left slope ${leftDerivative} ≠ Right slope ${rightDerivative})`;
+    }
+  } else {
+    nonDiffReason = `Function is discontinuous at x = ${c}`;
+  }
+
+  return {
+    x: c,
+    fX: isFcDefined ? Number(fC.toFixed(4)).toString() : 'Undefined',
+    leftLimit: leftLimitStr,
+    rightLimit: rightLimitStr,
+    limitValue,
+    limitExists,
+    isContinuous,
+    discontinuityType,
+    isDifferentiable,
+    nonDiffReason,
+    leftDerivative,
+    rightDerivative,
   };
 }
 

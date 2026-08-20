@@ -38,6 +38,28 @@ export interface Asymptote {
   label: string;
 }
 
+export interface CriticalPointAnalysis {
+  x: number;
+  label: string;
+  type: 'discontinuity' | 'non-differentiable' | 'root' | 'extrema';
+  reason: string;
+}
+
+export interface PointCalculusReport {
+  x: number;
+  fX: string;
+  leftLimit: string;
+  rightLimit: string;
+  limitValue: string;
+  limitExists: boolean;
+  isContinuous: boolean;
+  discontinuityType: string;
+  isDifferentiable: boolean;
+  nonDiffReason: string;
+  leftDerivative?: string;
+  rightDerivative?: string;
+}
+
 export interface AnalysisResult {
   expressionId: string;
   rawText: string;
@@ -51,6 +73,7 @@ export interface AnalysisResult {
   derivativeText?: string;
   isEvaluatable: boolean;
   error?: string;
+  criticalPoints?: CriticalPointAnalysis[];
 }
 
 export interface Viewport {
