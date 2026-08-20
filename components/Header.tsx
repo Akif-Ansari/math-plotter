@@ -25,6 +25,8 @@ import {
   Radio,
   Cpu,
   Atom,
+  Repeat,
+  Sliders,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -191,6 +193,33 @@ const PRESET_OPTIONS: DropdownOption<string>[] = [
       { value: 'conics:ellipse', label: 'Ellipse (5, 3)', description: 'x = 5cos(t), y = 3sin(t)' },
       { value: 'conics:parabola', label: 'Parabola', description: 'y = 0.25x² - 3' },
       { value: 'conics:hyperbola', label: 'Hyperbola Branch', description: 'y = √(x² + 4)' },
+    ],
+  },
+  {
+    value: 'periodic',
+    label: 'Periodic & Repeating Waves',
+    description: 'Square, Sawtooth, Beats & FM Waves',
+    icon: <Repeat className="w-4 h-4 text-amber-400" />,
+    subOptions: [
+      { value: 'periodic:square', label: 'Fourier Square Wave', description: 'y = 3(sin x + sin(3x)/3 + ...)' },
+      { value: 'periodic:sawtooth', label: 'Fourier Sawtooth Wave', description: 'y = 2(sin x - sin(2x)/2 + ...)' },
+      { value: 'periodic:triangle', label: 'Fourier Triangle Wave', description: 'y = 3(sin x - sin(3x)/9 + ...)' },
+      { value: 'periodic:beats', label: 'Acoustic Beats & Interference', description: 'y = 3cos(0.5x) sin(6x)' },
+      { value: 'periodic:fm_synth', label: 'FM Synthesizer Waveform', description: 'y = 3sin(x + 2.5sin(4x))' },
+      { value: 'periodic:secant', label: 'Periodic Secant Envelopes', description: 'y = sec(x)' },
+    ],
+  },
+  {
+    value: 'dynamic',
+    label: 'Dynamic Animated Curves',
+    description: 'Oscillating parameters (a, b, c) with Live Animation',
+    icon: <Sliders className="w-4 h-4 text-[#1DB954]" />,
+    subOptions: [
+      { value: 'dynamic:sine', label: 'Animated Sine Wave (a, b)', description: 'y = a sin(b x)' },
+      { value: 'dynamic:damped', label: 'Animated Damped Oscillation', description: 'y = a e^(-0.15x) cos(b x)' },
+      { value: 'dynamic:interference', label: 'Animated Dual Wave Beats', description: 'y = a sin(x) + b cos(2x)' },
+      { value: 'dynamic:gaussian', label: 'Animated Moving Gaussian', description: 'y = a e^(-(x-b)²/2)' },
+      { value: 'dynamic:parabola', label: 'Animated Dynamic Parabola', description: 'y = a(x - b)² + c' },
     ],
   },
 ];

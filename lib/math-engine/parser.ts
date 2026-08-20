@@ -309,18 +309,36 @@ export function compile2DExpression(
 
 /**
  * Extracts variable parameters like 'a', 'b', 'c', 'k', 'm' from input math string.
+ * Strips LaTeX command names and standard function keywords to avoid false positives.
  */
 export function extractParameters(rawInput: string): string[] {
   if (!rawInput) return [];
+
+  // 1. Strip LaTeX macro keywords
+  let cleaned = rawInput
+    .replace(/\\(frac|sqrt|left|right|cdot|times|div|pm|mp|operatorname|mathrm|text|displaystyle|limits)\b/gi, ' ')
+    .replace(/\\(sin|cos|tan|sec|csc|cot|arcsin|arccos|arctan|arcsec|arccsc|arccot|sinh|cosh|tanh)\b/gi, ' ')
+    .replace(/\\(pi|theta|phi|alpha|beta|gamma|delta|epsilon|omega|tau)\b/gi, ' ');
+
+  cleaned = normalizeTrigExpressions(cleaned);
+
   const reserved = new Set([
-    'x', 'y', 't', 'theta', 'X', 'Y', 'sin', 'cos', 'tan', 'sec', 'csc', 'cot',
-    'asin', 'acos', 'atan', 'asec', 'acsc', 'acot', 'sinh', 'cosh', 'tanh',
-    'log', 'log10', 'ln', 'sqrt', 'root', 'abs', 'exp', 'pi', 'e', 'min', 'max'
+    'x', 'y', 't', 'theta', 'x_of_y', 'X', 'Y',
+    'sin', 'cos', 'tan', 'sec', 'csc', 'cot', 'cosec',
+    'asin', 'acos', 'atan', 'asec', 'acsc', 'acot', 'acosec',
+    'arcsin', 'arccos', 'arctan', 'arcsec', 'arccsc', 'arccot',
+    'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh',
+    'log', 'log10', 'log2', 'ln', 'sqrt', 'cbrt', 'root', 'abs', 'exp',
+    'pi', 'e', 'tau', 'phi', 'min', 'max', 'floor', 'ceil', 'round', 'sign',
+    'frac', 'left', 'right', 'cdot', 'operatorname', 'mathrm', 'text', 'math',
+    'degree', 'deg', 'rad'
   ]);
-  const matches = rawInput.match(/\b[a-zA-Z_][a-zA-Z0-9_]*\b/g) || [];
+
+  const matches = cleaned.match(/\b[a-zA-Z_][a-zA-Z0-9_]*\b/g) || [];
   const found = new Set<string>();
   matches.forEach((m) => {
-    if (!reserved.has(m) && !reserved.has(m.toLowerCase())) {
+    const lower = m.toLowerCase();
+    if (!reserved.has(m) && !reserved.has(lower)) {
       found.add(m);
     }
   });

@@ -495,6 +495,125 @@ const CONICS_EXPRESSIONS: MathExpression[] = [
   },
 ];
 
+// 15. Periodic & Repeating Waves
+const PERIODIC_EXPRESSIONS: MathExpression[] = [
+  {
+    id: 'per1',
+    label: 'Fourier Square Wave (7 Harmonics)',
+    latex: 'y = 3\\left(\\sin(x) + \\frac{\\sin(3x)}{3} + \\frac{\\sin(5x)}{5} + \\frac{\\sin(7x)}{7}\\right)',
+    rawText: '3 * (sin(x) + sin(3 * x)/3 + sin(5 * x)/5 + sin(7 * x)/7)',
+    color: '#1DB954',
+    lineWidth: 2.5,
+    visible: true,
+    type: 'cartesian',
+  },
+  {
+    id: 'per2',
+    label: 'Fourier Sawtooth Wave',
+    latex: 'y = 2\\left(\\sin(x) - \\frac{\\sin(2x)}{2} + \\frac{\\sin(3x)}{3} - \\frac{\\sin(4x)}{4}\\right)',
+    rawText: '2 * (sin(x) - sin(2 * x)/2 + sin(3 * x)/3 - sin(4 * x)/4)',
+    color: '#3B82F6',
+    lineWidth: 2,
+    visible: true,
+    type: 'cartesian',
+  },
+  {
+    id: 'per3',
+    label: 'Fourier Triangle Wave',
+    latex: 'y = 3\\left(\\sin(x) - \\frac{\\sin(3x)}{9} + \\frac{\\sin(5x)}{25}\\right)',
+    rawText: '3 * (sin(x) - sin(3 * x)/9 + sin(5 * x)/25)',
+    color: '#F59E0B',
+    lineWidth: 2,
+    visible: true,
+    type: 'cartesian',
+  },
+  {
+    id: 'per4',
+    label: 'Acoustic Beats & Interference',
+    latex: 'y = 3\\cos(0.5x)\\sin(6x)',
+    rawText: '3 * cos(0.5 * x) * sin(6 * x)',
+    color: '#EC4899',
+    lineWidth: 2,
+    visible: true,
+    type: 'cartesian',
+  },
+  {
+    id: 'per5',
+    label: 'FM Synthesizer Waveform',
+    latex: 'y = 3\\sin(x + 2.5\\sin(4x))',
+    rawText: '3 * sin(x + 2.5 * sin(4 * x))',
+    color: '#8B5CF6',
+    lineWidth: 2,
+    visible: true,
+    type: 'cartesian',
+  },
+  {
+    id: 'per6',
+    label: 'Periodic Secant Envelopes',
+    latex: 'y = \\sec(x)',
+    rawText: 'sec(x)',
+    color: '#06B6D4',
+    lineWidth: 1.5,
+    lineStyle: 'dashed',
+    visible: true,
+    type: 'cartesian',
+  },
+];
+
+// 16. Dynamic Animated Curves (Uses Live Parameters a, b, c for Dynamic Slider & Animate Bar)
+const DYNAMIC_EXPRESSIONS: MathExpression[] = [
+  {
+    id: 'dyn1',
+    label: 'Animated Sine Wave (Amplitude a & Freq b)',
+    latex: 'y = a\\sin(bx)',
+    rawText: 'a * sin(b * x)',
+    color: '#1DB954',
+    lineWidth: 3,
+    visible: true,
+    type: 'cartesian',
+  },
+  {
+    id: 'dyn2',
+    label: 'Animated Damped Oscillation',
+    latex: 'y = a e^{-0.15x}\\cos(bx)',
+    rawText: 'a * exp(-0.15 * x) * cos(b * x)',
+    color: '#3B82F6',
+    lineWidth: 2.5,
+    visible: true,
+    type: 'cartesian',
+  },
+  {
+    id: 'dyn3',
+    label: 'Animated Dual Wave Interference',
+    latex: 'y = a\\sin(x) + b\\cos(2x)',
+    rawText: 'a * sin(x) + b * cos(2 * x)',
+    color: '#F59E0B',
+    lineWidth: 2.5,
+    visible: true,
+    type: 'cartesian',
+  },
+  {
+    id: 'dyn4',
+    label: 'Animated Moving Gaussian',
+    latex: 'y = a e^{-(x - b)^2 / 2}',
+    rawText: 'a * exp(-((x - b)^2) / 2)',
+    color: '#EC4899',
+    lineWidth: 2.5,
+    visible: true,
+    type: 'cartesian',
+  },
+  {
+    id: 'dyn5',
+    label: 'Animated Dynamic Parabola',
+    latex: 'y = a(x - b)^2 + c',
+    rawText: 'a * (x - b)^2 + c',
+    color: '#8B5CF6',
+    lineWidth: 2.5,
+    visible: true,
+    type: 'cartesian',
+  },
+];
+
 export const PRESET_DATA_MAP: Record<string, PresetData> = {
   // 1. Standard Overview
   prompt: { expressions: PROMPT_EXPRESSIONS, viewport: DEFAULT_VIEWPORT },
@@ -580,4 +699,21 @@ export const PRESET_DATA_MAP: Record<string, PresetData> = {
   'conics:ellipse': { expressions: [CONICS_EXPRESSIONS[0]], viewport: { xMin: -8, xMax: 8, yMin: -8, yMax: 8 } },
   'conics:parabola': { expressions: [CONICS_EXPRESSIONS[1]], viewport: { xMin: -8, xMax: 8, yMin: -8, yMax: 8 } },
   'conics:hyperbola': { expressions: [CONICS_EXPRESSIONS[2]], viewport: { xMin: -8, xMax: 8, yMin: -8, yMax: 8 } },
+
+  // 15. Periodic & Repeating Waves
+  periodic: { expressions: PERIODIC_EXPRESSIONS, viewport: { xMin: -12, xMax: 12, yMin: -5, yMax: 5 } },
+  'periodic:square': { expressions: [PERIODIC_EXPRESSIONS[0]], viewport: { xMin: -12, xMax: 12, yMin: -5, yMax: 5 } },
+  'periodic:sawtooth': { expressions: [PERIODIC_EXPRESSIONS[1]], viewport: { xMin: -12, xMax: 12, yMin: -5, yMax: 5 } },
+  'periodic:triangle': { expressions: [PERIODIC_EXPRESSIONS[2]], viewport: { xMin: -12, xMax: 12, yMin: -5, yMax: 5 } },
+  'periodic:beats': { expressions: [PERIODIC_EXPRESSIONS[3]], viewport: { xMin: -15, xMax: 15, yMin: -5, yMax: 5 } },
+  'periodic:fm_synth': { expressions: [PERIODIC_EXPRESSIONS[4]], viewport: { xMin: -12, xMax: 12, yMin: -5, yMax: 5 } },
+  'periodic:secant': { expressions: [PERIODIC_EXPRESSIONS[5]], viewport: { xMin: -10, xMax: 10, yMin: -6, yMax: 6 } },
+
+  // 16. Dynamic Animated Curves
+  dynamic: { expressions: DYNAMIC_EXPRESSIONS, viewport: { xMin: -10, xMax: 10, yMin: -8, yMax: 8 } },
+  'dynamic:sine': { expressions: [DYNAMIC_EXPRESSIONS[0]], viewport: { xMin: -10, xMax: 10, yMin: -8, yMax: 8 } },
+  'dynamic:damped': { expressions: [DYNAMIC_EXPRESSIONS[1]], viewport: { xMin: -1, xMax: 15, yMin: -8, yMax: 8 } },
+  'dynamic:interference': { expressions: [DYNAMIC_EXPRESSIONS[2]], viewport: { xMin: -10, xMax: 10, yMin: -8, yMax: 8 } },
+  'dynamic:gaussian': { expressions: [DYNAMIC_EXPRESSIONS[3]], viewport: { xMin: -8, xMax: 8, yMin: -1, yMax: 8 } },
+  'dynamic:parabola': { expressions: [DYNAMIC_EXPRESSIONS[4]], viewport: { xMin: -8, xMax: 8, yMin: -8, yMax: 8 } },
 };
