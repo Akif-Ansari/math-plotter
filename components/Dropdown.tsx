@@ -10,6 +10,7 @@ export interface DropdownOption<T = string | number> {
   icon?: React.ReactNode;
   disabled?: boolean;
   badge?: string;
+  subOptions?: DropdownOption<T>[];
 }
 
 export interface DropdownProps<T = string | number> {
@@ -30,6 +31,19 @@ export interface DropdownProps<T = string | number> {
   menuPlacement?: 'bottom' | 'top' | 'auto';
   fullWidth?: boolean;
   id?: string;
+}
+
+// Pure recursive helper to find selected option across main and sub-options
+function findSelectedOption<T>(opts: DropdownOption<T>[], val?: T): DropdownOption<T> | undefined {
+  if (val === undefined) return undefined;
+  for (const opt of opts) {
+    if (opt.value === val) return opt;
+    if (opt.subOptions) {
+      const found = findSelectedOption(opt.subOptions, val);
+      if (found) return found;
+    }
+  }
+  return undefined;
 }
 
 export default function Dropdown<T extends string | number = string>({
@@ -53,11 +67,12 @@ export default function Dropdown<T extends string | number = string>({
 }: DropdownProps<T>) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [highlightedIndex, setHighlightedIndex] = React.useState<number>(-1);
+  const [expandedGroups, setExpandedGroups] = React.useState<Record<string, boolean>>({});
   const containerRef = React.useRef<HTMLDivElement>(null);
   const menuRef = React.useRef<HTMLDivElement>(null);
   const [openUpward, setOpenUpward] = React.useState(false);
 
-  const selectedOption = options.find((opt) => opt.value === value);
+  const selectedOption = findSelectedOption(options, value);
 
   // Close when clicking outside
   React.useEffect(() => {
@@ -255,66 +270,175 @@ export default function Dropdown<T extends string | number = string>({
             options.map((option, index) => {
               const isSelected = option.value === value;
               const isHighlighted = index === highlightedIndex;
+              const hasSub = option.subOptions && option.subOptions.length > 0;
+              const isExpanded = !!expandedGroups[String(option.value)];
 
               return (
-                <button
-                  key={String(option.value)}
-                  type="button"
-                  role="option"
-                  aria-selected={isSelected}
-                  disabled={option.disabled}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (!option.disabled && onChange) {
-                      onChange(option.value);
-                      setIsOpen(false);
-                    }
-                  }}
-                  onMouseEnter={() => setHighlightedIndex(index)}
-                  className={`w-full flex items-center justify-between gap-2 px-2.5 py-1.5 sm:py-2 rounded-md text-left transition-all duration-100 cursor-pointer select-none ${size === 'xs' ? 'text-[11px] py-1 px-2' : size === 'lg' ? 'text-sm py-2 px-3' : 'text-xs'
-                    } ${option.disabled
-                      ? 'opacity-40 cursor-not-allowed text-zinc-500'
-                      : isSelected
-                        ? isDarkTheme
-                          ? 'bg-[#006241]/35 text-[#1DB954] font-semibold'
-                          : 'bg-[#1DB954]/15 text-[#006241] font-semibold'
-                        : isHighlighted
+                <div key={String(option.value)} className="w-full">
+                  <div
+                    className={`w-full flex items-center justify-between gap-1.5 px-2.5 py-1.5 sm:py-2 rounded-md text-left transition-all duration-100 select-none ${size === 'xs' ? 'text-[11px] py-1 px-2' : size === 'lg' ? 'text-sm py-2 px-3' : 'text-xs'
+                      } ${option.disabled
+                        ? 'opacity-40 cursor-not-allowed text-zinc-500'
+                        : isSelected
                           ? isDarkTheme
-                            ? 'bg-zinc-800 text-white'
-                            : 'bg-zinc-100 text-zinc-900'
-                          : isDarkTheme
-                            ? 'text-zinc-300 hover:text-white'
-                            : 'text-zinc-700 hover:text-zinc-900'
-                    }`}
-                >
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    {option.icon && (
-                      <span className="flex-shrink-0">{option.icon}</span>
-                    )}
-                    <div className="truncate flex-1">
-                      <div className="truncate font-medium">{option.label}</div>
-                      {option.description && (
-                        <div
-                          className={`text-[10px] truncate ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-500'
-                            }`}
-                        >
-                          {option.description}
-                        </div>
+                            ? 'bg-[#006241]/35 text-[#1DB954] font-semibold'
+                            : 'bg-[#1DB954]/15 text-[#006241] font-semibold'
+                          : isHighlighted
+                            ? isDarkTheme
+                              ? 'bg-zinc-800 text-white'
+                              : 'bg-zinc-100 text-zinc-900'
+                            : isDarkTheme
+                              ? 'text-zinc-300 hover:text-white hover:bg-zinc-800/60'
+                              : 'text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100'
+                      }`}
+                  >
+                    {/* Main Option Click Target */}
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={isSelected}
+                      disabled={option.disabled}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (hasSub) {
+                          // Toggle sub-options or select all
+                          setExpandedGroups((prev) => ({ ...prev, [String(option.value)]: !prev[String(option.value)] }));
+                        } else if (!option.disabled && onChange) {
+                          onChange(option.value);
+                          setIsOpen(false);
+                        }
+                      }}
+                      onMouseEnter={() => setHighlightedIndex(index)}
+                      className="flex items-center gap-2 min-w-0 flex-1 text-left cursor-pointer"
+                    >
+                      {option.icon && (
+                        <span className="flex-shrink-0">{option.icon}</span>
                       )}
-                    </div>
-                    {option.badge && (
-                      <span className="text-[9px] px-1.5 py-0.2 rounded-full font-mono bg-[#1DB954]/20 text-[#1DB954] ">
-                        {option.badge}
-                      </span>
+                      <div className="truncate flex-1">
+                        <div className="truncate font-medium flex items-center gap-1.5">
+                          <span>{option.label}</span>
+                          {hasSub && (
+                            <span className={`text-[9px] px-1 py-0.2 rounded font-sans font-normal ${isDarkTheme ? 'bg-zinc-800 text-zinc-400' : 'bg-zinc-200 text-zinc-600'}`}>
+                              {option.subOptions?.length} charts
+                            </span>
+                          )}
+                        </div>
+                        {option.description && (
+                          <div
+                            className={`text-[10px] truncate ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-500'
+                              }`}
+                          >
+                            {option.description}
+                          </div>
+                        )}
+                      </div>
+                      {option.badge && (
+                        <span className="text-[9px] px-1.5 py-0.2 rounded-full font-mono bg-[#1DB954]/20 text-[#1DB954] ">
+                          {option.badge}
+                        </span>
+                      )}
+                    </button>
+
+                    {/* Actions: Select Entire Group OR Toggle Sub-Menu */}
+                    {hasSub ? (
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <button
+                          type="button"
+                          title="Load All in Group"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (onChange) {
+                              onChange(option.value);
+                              setIsOpen(false);
+                            }
+                          }}
+                          className={`text-[10px] font-semibold px-1.5 py-0.5 rounded transition cursor-pointer ${
+                            isDarkTheme
+                              ? 'bg-zinc-800 hover:bg-[#1DB954] hover:text-black text-zinc-300'
+                              : 'bg-zinc-200 hover:bg-[#1DB954] hover:text-white text-zinc-700'
+                          }`}
+                        >
+                          All
+                        </button>
+                        <button
+                          type="button"
+                          title={isExpanded ? 'Collapse sub-charts' : 'Expand sub-charts'}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setExpandedGroups((prev) => ({ ...prev, [String(option.value)]: !prev[String(option.value)] }));
+                          }}
+                          className={`p-1 rounded transition cursor-pointer ${
+                            isDarkTheme ? 'text-zinc-400 hover:text-white hover:bg-zinc-750' : 'text-zinc-500 hover:text-black hover:bg-zinc-200'
+                          }`}
+                        >
+                          <ChevronDown
+                            className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                              isExpanded ? 'rotate-180 text-[#1DB954]' : ''
+                            }`}
+                          />
+                        </button>
+                      </div>
+                    ) : (
+                      isSelected && (
+                        <Check
+                          className={`${iconSizes[size]} text-[#1DB954] flex-shrink-0 ml-2 animate-in zoom-in duration-150`}
+                        />
+                      )
                     )}
                   </div>
 
-                  {isSelected && (
-                    <Check
-                      className={`${iconSizes[size]} text-[#1DB954] flex-shrink-0 ml-2 animate-in zoom-in duration-150`}
-                    />
+                  {/* Sub-Options List (Accordion) */}
+                  {hasSub && isExpanded && (
+                    <div className={`ml-4 pl-3 py-1 space-y-0.5 border-l-2 border-[#1DB954]/30 my-0.5 animate-in slide-in-from-top-1 duration-150`}>
+                      {option.subOptions!.map((sub) => {
+                        const isSubSelected = sub.value === value;
+                        return (
+                          <button
+                            key={String(sub.value)}
+                            type="button"
+                            role="option"
+                            aria-selected={isSubSelected}
+                            disabled={sub.disabled}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (!sub.disabled && onChange) {
+                                onChange(sub.value);
+                                setIsOpen(false);
+                              }
+                            }}
+                            className={`w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded text-left text-xs transition cursor-pointer select-none ${
+                              sub.disabled
+                                ? 'opacity-40 cursor-not-allowed text-zinc-500'
+                                : isSubSelected
+                                  ? isDarkTheme
+                                    ? 'bg-[#006241]/40 text-[#1DB954] font-semibold'
+                                    : 'bg-[#1DB954]/20 text-[#006241] font-semibold'
+                                  : isDarkTheme
+                                    ? 'text-zinc-300 hover:bg-zinc-800/80 hover:text-white'
+                                    : 'text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900'
+                            }`}
+                          >
+                            <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                              <span className="text-[10px] text-zinc-500 flex-shrink-0 font-mono">↳</span>
+                              {sub.icon && <span className="flex-shrink-0">{sub.icon}</span>}
+                              <div className="truncate flex-1">
+                                <div className="truncate text-xs font-medium">{sub.label}</div>
+                                {sub.description && (
+                                  <div className={`text-[10px] font-mono truncate ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                                    {sub.description}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            {isSubSelected && (
+                              <Check className="w-3 h-3 text-[#1DB954] flex-shrink-0 ml-1.5" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
                   )}
-                </button>
+                </div>
               );
             })
           )}
