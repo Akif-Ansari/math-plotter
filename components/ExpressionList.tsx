@@ -90,14 +90,14 @@ export default function ExpressionList({
 
   if (isCollapsed) {
     return (
-      <aside className={`w-12 sm:w-14 border-r flex flex-col items-center py-3 sm:py-4 z-10 shadow-xl select-none flex-shrink-0 transition-colors duration-200 ${isDarkTheme ? 'bg-zinc-900 border-zinc-800 text-white' : 'bg-white border-zinc-200 text-zinc-900'
+      <aside className={`w-12 sm:w-14  flex flex-col items-center py-3 sm:py-4 z-10 shadow-xl select-none flex-shrink-0 transition-colors duration-200 ${isDarkTheme ? 'bg-zinc-900 border-zinc-800 text-white' : 'bg-white border-zinc-200 text-zinc-900'
         }`}>
         <button
           onClick={() => setIsCollapsed(false)}
           title="Expand Expression Panel"
           className={`p-1.5 sm:p-2 rounded-md transition cursor-pointer mb-3 sm:mb-4 ${isDarkTheme
-            ? "bg-[#212121] border-r-[#333] text-white"
-            : "bg-[#fafafa] border-r-[#ebebeb] text-black"
+            ? "bg-[#212121]  text-white"
+            : "bg-[#fafafa]  text-black"
             }`}
         >
           <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />

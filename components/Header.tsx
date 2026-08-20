@@ -22,6 +22,9 @@ import {
   BarChart3,
   Layers,
   Zap,
+  Radio,
+  Cpu,
+  Atom,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -46,6 +49,30 @@ const PRESET_OPTIONS: DropdownOption<string>[] = [
     label: 'Calculus & Polynomials',
     description: 'Cubic & quadratic roots/extrema',
     icon: <FunctionSquare className="w-4 h-4 text-emerald-400" />,
+  },
+  {
+    value: 'riemann',
+    label: 'Riemann & Dirichlet',
+    description: 'Sinc kernel & Dirichlet η waves',
+    icon: <Sigma className="w-4 h-4 text-fuchsia-400" />,
+  },
+  {
+    value: 'laplace',
+    label: 'Laplace & System Dynamics',
+    description: 'Double exponential & damping',
+    icon: <Cpu className="w-4 h-4 text-sky-400" />,
+  },
+  {
+    value: 'bessel',
+    label: 'Bessel & Wave Optics',
+    description: 'J₀, J₁ diffraction & standing waves',
+    icon: <Radio className="w-4 h-4 text-teal-400" />,
+  },
+  {
+    value: 'exotic',
+    label: 'Transcendental & Butterfly',
+    description: 'Butterfly curve & Lemniscate',
+    icon: <Atom className="w-4 h-4 text-rose-400" />,
   },
   {
     value: 'asymptotes',

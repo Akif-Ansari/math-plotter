@@ -193,6 +193,162 @@ export default function Home() {
         ]);
         setViewport({ xMin: -5, xMax: 5, yMin: -5, yMax: 5 });
         break;
+      case 'riemann':
+        setExpressions([
+          {
+            id: 'rm1',
+            label: 'Dirichlet Sinc Kernel',
+            latex: 'y = \\frac{\\sin(\\pi x)}{\\pi x}',
+            rawText: 'sin(pi * x) / (pi * x)',
+            color: '#1DB954',
+            lineWidth: 3,
+            visible: true,
+            type: 'cartesian',
+          },
+          {
+            id: 'rm2',
+            label: 'Sinc Derivative',
+            latex: 'y = \\frac{\\pi x \\cos(\\pi x) - \\sin(\\pi x)}{\\pi x^2}',
+            rawText: '(pi * x * cos(pi * x) - sin(pi * x)) / (pi * (x^2))',
+            color: '#3B82F6',
+            lineStyle: 'dashed',
+            lineWidth: 1.5,
+            visible: true,
+            type: 'cartesian',
+          },
+          {
+            id: 'rm3',
+            label: 'Dirichlet η Critical Harmonic',
+            latex: 'y = \\frac{\\cos(x\\ln 2)}{\\sqrt{2}} - \\frac{\\cos(x\\ln 3)}{\\sqrt{3}} + \\frac{\\cos(x\\ln 4)}{\\sqrt{4}}',
+            rawText: 'cos(x * log(2)) / sqrt(2) - cos(x * log(3)) / sqrt(3) + cos(x * log(4)) / sqrt(4)',
+            color: '#A855F7',
+            lineWidth: 2,
+            visible: true,
+            type: 'cartesian',
+          },
+        ]);
+        setViewport({ xMin: -10, xMax: 10, yMin: -2, yMax: 2 });
+        break;
+      case 'laplace':
+        setExpressions([
+          {
+            id: 'lp1',
+            label: 'Laplace Distribution (Double Exp)',
+            latex: 'y = 3e^{-|x|}',
+            rawText: '3 * exp(-abs(x))',
+            color: '#1DB954',
+            lineWidth: 2.5,
+            visible: true,
+            type: 'cartesian',
+          },
+          {
+            id: 'lp2',
+            label: 'Underdamped Impulse Response',
+            latex: 'y = 6x e^{-0.7x} \\sin(3x)',
+            rawText: '6 * x * exp(-0.7 * x) * sin(3 * x)',
+            color: '#06B6D4',
+            lineWidth: 2.5,
+            visible: true,
+            type: 'cartesian',
+          },
+          {
+            id: 'lp3',
+            label: 'Critically Damped Impulse',
+            latex: 'y = 5x e^{-x}',
+            rawText: '5 * x * exp(-x)',
+            color: '#F59E0B',
+            lineWidth: 2,
+            visible: true,
+            type: 'cartesian',
+          },
+          {
+            id: 'lp4',
+            label: 'Overdamped Step Response',
+            latex: 'y = 4(e^{-0.3x} - e^{-1.5x})',
+            rawText: '4 * (exp(-0.3 * x) - exp(-1.5 * x))',
+            color: '#EC4899',
+            lineWidth: 2,
+            visible: true,
+            type: 'cartesian',
+          },
+        ]);
+        setViewport({ xMin: -2, xMax: 12, yMin: -3, yMax: 5 });
+        break;
+      case 'bessel':
+        setExpressions([
+          {
+            id: 'bs1',
+            label: 'Bessel J₀ Diffraction',
+            latex: 'y = \\frac{\\sin(x)}{x}',
+            rawText: 'sin(x) / x',
+            color: '#1DB954',
+            lineWidth: 3,
+            visible: true,
+            type: 'cartesian',
+          },
+          {
+            id: 'bs2',
+            label: 'Bessel J₁ 1st Order',
+            latex: 'y = \\frac{\\sin(x) - x\\cos(x)}{x^2}',
+            rawText: '(sin(x) - x * cos(x)) / (x^2)',
+            color: '#3B82F6',
+            lineWidth: 2,
+            visible: true,
+            type: 'cartesian',
+          },
+          {
+            id: 'bs3',
+            label: 'Standing Wave Nodes',
+            latex: 'y = 2\\cos(3x)\\sin(2x)',
+            rawText: '2 * cos(3 * x) * sin(2 * x)',
+            color: '#8B5CF6',
+            lineStyle: 'dashed',
+            lineWidth: 1.5,
+            visible: true,
+            type: 'cartesian',
+          },
+        ]);
+        setViewport({ xMin: -15, xMax: 15, yMin: -2.5, yMax: 2.5 });
+        break;
+      case 'exotic':
+        setExpressions([
+          {
+            id: 'ex1',
+            label: 'Butterfly Curve (Temple Fay)',
+            latex: 'r = e^{\\sin\\theta} - 2\\cos(4\\theta) + \\sin^5\\left(\\frac{2\\theta-\\pi}{24}\\right)',
+            rawText: 'exp(sin(theta)) - 2*cos(4*theta) + sin((2*theta - pi)/24)^5',
+            color: '#EC4899',
+            lineWidth: 2.5,
+            visible: true,
+            type: 'polar',
+          },
+          {
+            id: 'ex2',
+            label: 'Lemniscate of Bernoulli',
+            latex: 'r = 4\\sqrt{|\\cos(2\\theta)|}',
+            rawText: '4 * sqrt(abs(cos(2 * theta)))',
+            color: '#1DB954',
+            lineWidth: 2.5,
+            visible: true,
+            type: 'polar',
+          },
+          {
+            id: 'ex3',
+            label: 'Deltoid (3-Cusp Hypocycloid)',
+            latex: 'x(t) = 2\\cos(t) + \\cos(2t), y(t) = 2\\sin(t) - \\sin(2t)',
+            rawText: '2*cos(t) + cos(2*t)',
+            parametricX: '2*cos(t) + cos(2*t)',
+            parametricY: '2*sin(t) - sin(2*t)',
+            color: '#3B82F6',
+            lineWidth: 2.5,
+            visible: true,
+            type: 'parametric',
+            domainMin: 0,
+            domainMax: 6.283,
+          },
+        ]);
+        setViewport({ xMin: -6, xMax: 6, yMin: -6, yMax: 6 });
+        break;
       case 'asymptotes':
         setExpressions([
           {
