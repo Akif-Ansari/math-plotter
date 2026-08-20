@@ -90,7 +90,7 @@ export default function Dropdown<T extends string | number = string>({
         const estimatedHeight = Math.min(options.length * 36 + 20, 260);
         setOpenUpward(spaceBelow < estimatedHeight && rect.top > estimatedHeight);
       }
-      
+
       const selectedIdx = options.findIndex((opt) => opt.value === value);
       setHighlightedIndex(selectedIdx >= 0 ? selectedIdx : 0);
     }
@@ -143,10 +143,10 @@ export default function Dropdown<T extends string | number = string>({
 
   // Size styling tokens
   const sizeStyles = {
-    xs: 'text-[10px] sm:text-[11px] py-1 px-2 gap-1 rounded-md',
-    sm: 'text-xs py-1.5 px-2.5 sm:px-3 gap-1.5 rounded-lg',
-    md: 'text-xs sm:text-sm py-2 px-3 sm:px-3.5 gap-2 rounded-lg',
-    lg: 'text-sm sm:text-base py-2.5 px-4 gap-2.5 rounded-xl',
+    xs: 'text-[10px] sm:text-[11px] py-1 px-2 gap-1 rounded-sm',
+    sm: 'text-xs py-2 px-2.5 sm:px-3 gap-1.5 rounded-md',
+    md: 'text-xs sm:text-sm py-2.5 px-3 sm:px-3.5 gap-2 rounded-lg',
+    lg: 'text-sm sm:text-base py-3 px-4 gap-2.5 rounded-xl',
   };
 
   const iconSizes = {
@@ -156,32 +156,29 @@ export default function Dropdown<T extends string | number = string>({
     lg: 'w-4 h-4 sm:w-5 sm:h-5',
   };
 
-  // Base theme background & border classes
+  // Base theme background & styling classes
   const getThemeButtonStyles = () => {
     if (disabled) {
       return isDarkTheme
-        ? 'bg-zinc-900/50 text-zinc-600 border-zinc-800/60 cursor-not-allowed opacity-60'
-        : 'bg-zinc-100 text-zinc-400 border-zinc-200 cursor-not-allowed opacity-60';
+        ? 'bg-[#333333]/50 text-zinc-600 cursor-not-allowed opacity-60'
+        : 'bg-[#e2e2e2]/50 text-zinc-400 cursor-not-allowed opacity-60';
     }
 
     switch (variant) {
       case 'compact':
-        return isDarkTheme
-          ? 'bg-zinc-800/90 hover:bg-zinc-750 text-zinc-200 border-zinc-700/80 hover:border-zinc-600 focus:border-[#1DB954]'
-          : 'bg-zinc-100/90 hover:bg-zinc-200/90 text-zinc-800 border-zinc-300 hover:border-zinc-400 focus:border-[#1DB954]';
-      case 'outline':
-        return isDarkTheme
-          ? 'bg-transparent hover:bg-zinc-800/60 text-zinc-200 border-zinc-700 hover:border-zinc-600'
-          : 'bg-transparent hover:bg-zinc-100 text-zinc-800 border-zinc-300 hover:border-zinc-400';
-      case 'ghost':
-        return isDarkTheme
-          ? 'bg-transparent hover:bg-zinc-800/70 text-zinc-300 hover:text-white border-transparent'
-          : 'bg-transparent hover:bg-zinc-100 text-zinc-700 hover:text-zinc-900 border-transparent';
       case 'default':
       default:
         return isDarkTheme
-          ? 'bg-zinc-800/95 hover:bg-zinc-750 text-zinc-100 border-zinc-700/80 hover:border-zinc-600 shadow-sm focus:border-[#1DB954]'
-          : 'bg-white hover:bg-zinc-50 text-zinc-900 border-zinc-300 hover:border-zinc-400 shadow-sm focus:border-[#1DB954]';
+          ? 'bg-[#333333] hover:bg-[#333333]/80 text-white'
+          : 'bg-[#e2e2e2]/90 hover:bg-[#e8e8e8] text-black';
+      case 'outline':
+        return isDarkTheme
+          ? 'bg-transparent hover:bg-zinc-800/60 text-zinc-200 '
+          : 'bg-transparent hover:bg-zinc-100 text-zinc-800 ';
+      case 'ghost':
+        return isDarkTheme
+          ? 'bg-transparent hover:bg-zinc-800/70 text-zinc-300 hover:text-white'
+          : 'bg-transparent hover:bg-zinc-100 text-zinc-700 hover:text-zinc-900';
     }
   };
 
@@ -194,9 +191,8 @@ export default function Dropdown<T extends string | number = string>({
     >
       {label && (
         <label
-          className={`block text-[11px] font-medium uppercase tracking-wider mb-1 ${
-            isDarkTheme ? 'text-zinc-400' : 'text-zinc-600'
-          }`}
+          className={`block text-[11px] font-medium uppercase tracking-wider mb-1 ${isDarkTheme ? 'text-white' : 'text-black/90'
+            }`}
         >
           {label}
         </label>
@@ -209,11 +205,9 @@ export default function Dropdown<T extends string | number = string>({
         onClick={() => !disabled && setIsOpen((prev) => !prev)}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        className={`group flex items-center justify-between font-medium border transition-all duration-150 cursor-pointer select-none focus:outline-none focus:ring-1 focus:ring-[#1DB954]/50 ${
-          fullWidth ? 'w-full' : ''
-        } ${sizeStyles[size]} ${getThemeButtonStyles()} ${
-          isOpen ? 'ring-1 ring-[#1DB954]/60 border-[#1DB954]' : ''
-        } ${buttonClassName}`}
+        className={`group flex items-center justify-between font-medium transition-all duration-150 cursor-pointer select-none focus:outline-none  ${fullWidth ? 'w-full' : ''
+          } ${sizeStyles[size]} ${getThemeButtonStyles()} ${isOpen ? '' : ''
+          } ${buttonClassName}`}
       >
         <div className="flex items-center gap-2 min-w-0 flex-1 text-left">
           {icon && <span className="flex-shrink-0 text-[#1DB954]">{icon}</span>}
@@ -224,16 +218,15 @@ export default function Dropdown<T extends string | number = string>({
             {selectedOption ? selectedOption.label : placeholder}
           </span>
           {selectedOption?.badge && (
-            <span className="text-[9px] px-1.5 py-0.2 rounded-full font-mono bg-[#1DB954]/20 text-[#1DB954] border border-[#1DB954]/30">
+            <span className="text-[9px] px-1.5 py-0.2 rounded-full font-mono bg-[#1DB954]/20 text-[#1DB954] ">
               {selectedOption.badge}
             </span>
           )}
         </div>
 
         <ChevronDown
-          className={`${iconSizes[size]} ml-1 flex-shrink-0 transition-transform duration-200 ease-out text-zinc-400 group-hover:text-zinc-200 ${
-            isOpen ? 'rotate-180 text-[#1DB954]' : ''
-          }`}
+          className={`${iconSizes[size]} ml-1 flex-shrink-0 transition-transform duration-200 ease-out text-zinc-400 group-hover:text-zinc-200 ${isOpen ? 'rotate-180 text-[#1DB954]' : ''
+            }`}
         />
       </button>
 
@@ -242,22 +235,18 @@ export default function Dropdown<T extends string | number = string>({
         <div
           ref={menuRef}
           role="listbox"
-          className={`absolute z-50 min-w-full ${
-            fullWidth ? 'w-full' : 'w-max'
-          } ${align === 'right' ? 'right-0' : 'left-0'} ${
-            openUpward ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
-          } rounded-xl border p-1 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150 origin-top overflow-hidden ${
-            isDarkTheme
-              ? 'bg-zinc-900/98 border-zinc-750 text-zinc-100 shadow-black/60 ring-1 ring-white/5'
-              : 'bg-white/98 border-zinc-200 text-zinc-900 shadow-zinc-900/15 ring-1 ring-black/5'
-          } ${menuClassName}`}
+          className={`absolute z-50 min-w-full ${fullWidth ? 'w-full' : 'w-max'
+            } ${align === 'right' ? 'right-0' : 'left-0'} ${openUpward ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
+            } rounded-lg  p-1  backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150 origin-top overflow-hidden ${isDarkTheme
+              ? 'bg-zinc-900/98  text-zinc-100 shadow-black/60 ring-1 ring-white/5'
+              : 'bg-white/98  text-zinc-900 shadow-zinc-900/15 ring-1 ring-black/5'
+            } ${menuClassName}`}
           style={{ maxHeight: '280px', overflowY: 'auto' }}
         >
           {options.length === 0 ? (
             <div
-              className={`p-3 text-center text-xs ${
-                isDarkTheme ? 'text-zinc-500' : 'text-zinc-400'
-              }`}
+              className={`p-3 text-center text-xs ${isDarkTheme ? 'text-zinc-500' : 'text-zinc-400'
+                }`}
             >
               No options available
             </div>
@@ -281,23 +270,21 @@ export default function Dropdown<T extends string | number = string>({
                     }
                   }}
                   onMouseEnter={() => setHighlightedIndex(index)}
-                  className={`w-full flex items-center justify-between gap-2 px-2.5 py-1.5 sm:py-2 rounded-lg text-left transition-all duration-100 cursor-pointer select-none ${
-                    size === 'xs' ? 'text-[11px] py-1 px-2' : size === 'lg' ? 'text-sm py-2 px-3' : 'text-xs'
-                  } ${
-                    option.disabled
+                  className={`w-full flex items-center justify-between gap-2 px-2.5 py-1.5 sm:py-2 rounded-md text-left transition-all duration-100 cursor-pointer select-none ${size === 'xs' ? 'text-[11px] py-1 px-2' : size === 'lg' ? 'text-sm py-2 px-3' : 'text-xs'
+                    } ${option.disabled
                       ? 'opacity-40 cursor-not-allowed text-zinc-500'
                       : isSelected
-                      ? isDarkTheme
-                        ? 'bg-[#006241]/35 text-[#1DB954] font-semibold'
-                        : 'bg-[#1DB954]/15 text-[#006241] font-semibold'
-                      : isHighlighted
-                      ? isDarkTheme
-                        ? 'bg-zinc-800 text-white'
-                        : 'bg-zinc-100 text-zinc-900'
-                      : isDarkTheme
-                      ? 'text-zinc-300 hover:text-white'
-                      : 'text-zinc-700 hover:text-zinc-900'
-                  }`}
+                        ? isDarkTheme
+                          ? 'bg-[#006241]/35 text-[#1DB954] font-semibold'
+                          : 'bg-[#1DB954]/15 text-[#006241] font-semibold'
+                        : isHighlighted
+                          ? isDarkTheme
+                            ? 'bg-zinc-800 text-white'
+                            : 'bg-zinc-100 text-zinc-900'
+                          : isDarkTheme
+                            ? 'text-zinc-300 hover:text-white'
+                            : 'text-zinc-700 hover:text-zinc-900'
+                    }`}
                 >
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     {option.icon && (
@@ -307,16 +294,15 @@ export default function Dropdown<T extends string | number = string>({
                       <div className="truncate font-medium">{option.label}</div>
                       {option.description && (
                         <div
-                          className={`text-[10px] truncate ${
-                            isDarkTheme ? 'text-zinc-400' : 'text-zinc-500'
-                          }`}
+                          className={`text-[10px] truncate ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-500'
+                            }`}
                         >
                           {option.description}
                         </div>
                       )}
                     </div>
                     {option.badge && (
-                      <span className="text-[9px] px-1.5 py-0.2 rounded-full font-mono bg-[#1DB954]/20 text-[#1DB954] border border-[#1DB954]/30">
+                      <span className="text-[9px] px-1.5 py-0.2 rounded-full font-mono bg-[#1DB954]/20 text-[#1DB954] ">
                         {option.badge}
                       </span>
                     )}

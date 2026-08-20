@@ -84,19 +84,23 @@ export default function ExpressionList({
   const [isCollapsed, setIsCollapsed] = React.useState<boolean>(false);
   const [editingSettingsId, setEditingSettingsId] = React.useState<string | null>(null);
 
+  React.useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      setIsCollapsed(true);
+    }
+  }, []);
+
   if (isCollapsed) {
     return (
-      <aside className={`w-12 sm:w-14 border-r flex flex-col items-center py-3 sm:py-4 z-10 shadow-xl select-none flex-shrink-0 transition-colors duration-200 ${
-        isDarkTheme ? 'bg-zinc-900 border-zinc-800 text-white' : 'bg-white border-zinc-200 text-zinc-900'
-      }`}>
+      <aside className={`w-12 sm:w-14 border-r flex flex-col items-center py-3 sm:py-4 z-10 shadow-xl select-none flex-shrink-0 transition-colors duration-200 ${isDarkTheme ? 'bg-zinc-900 border-zinc-800 text-white' : 'bg-white border-zinc-200 text-zinc-900'
+        }`}>
         <button
           onClick={() => setIsCollapsed(false)}
           title="Expand Expression Panel"
-          className={`p-1.5 sm:p-2 rounded-lg border transition cursor-pointer mb-3 sm:mb-4 ${
-            isDarkTheme
-              ? 'text-zinc-400 hover:text-white bg-zinc-800 hover:bg-zinc-750 border-zinc-700'
-              : 'text-zinc-500 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200 border-zinc-300'
-          }`}
+          className={`p-1.5 sm:p-2 rounded-md transition cursor-pointer mb-3 sm:mb-4 ${isDarkTheme
+            ? "bg-[#212121] border-r-[#333] text-white"
+            : "bg-[#fafafa] border-r-[#ebebeb] text-black"
+            }`}
         >
           <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
@@ -127,24 +131,22 @@ export default function ExpressionList({
   }
 
   return (
-    <aside className={`w-full sm:w-80 md:w-96 border-r flex flex-col h-full z-10 shadow-xl select-none min-w-0 max-w-full overflow-hidden transition-colors duration-200 ${
-      isDarkTheme ? 'bg-zinc-900 border-zinc-800 text-white' : 'bg-white border-zinc-200 text-zinc-900'
-    }`}>
-      {/* Sidebar Header */}
-      <div className={`p-2.5 sm:p-3.5 border-b flex items-center justify-between min-w-0 ${
-        isDarkTheme ? 'bg-zinc-950/40 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
+    <aside className={`w-full sm:w-80 md:w-96 border-r flex flex-col h-full z-10 shadow-xl select-none min-w-0 max-w-full overflow-hidden transition-colors duration-200 
+      ${isDarkTheme ?
+        'bg-zinc-900 border-zinc-800 text-white' : 'bg-white border-zinc-200 text-zinc-900'
       }`}>
-        <div className="flex items-center gap-2">
-          <Calculator className="w-4 h-4 text-[#1DB954]" />
-          <h2 className={`font-semibold text-xs sm:text-sm ${isDarkTheme ? 'text-zinc-200' : 'text-zinc-800'}`}>
-            Expressions
-          </h2>
-        </div>
+      {/* Sidebar Header */}
+      <div className={`p-2.5 sm:p-3.5  flex items-center justify-between min-w-0 `}>
+
+        <h2 className={`font-semibold text-sm sm:text-base ${isDarkTheme ? 'text-white' : 'text-black/90'}`}>
+          Expressions
+        </h2>
+
 
         <div className="flex items-center gap-1 sm:gap-1.5">
           <button
             onClick={onAddExpression}
-            className="flex items-center gap-1 text-[11px] sm:text-xs font-semibold bg-[#1DB954] hover:bg-[#18a349] text-black px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg transition cursor-pointer shadow-md shadow-[#1DB954]/20"
+            className="flex items-center gap-1 text-[11px] sm:text-xs font-semibold bg-[#1DB954] hover:bg-[#18a349] text-black px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-sm transition cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Add</span>
@@ -153,9 +155,8 @@ export default function ExpressionList({
           <button
             onClick={() => setIsCollapsed(true)}
             title="Collapse Sidebar"
-            className={`p-1 sm:p-1.5 rounded-lg transition cursor-pointer ${
-              isDarkTheme ? 'text-zinc-400 hover:text-white hover:bg-zinc-800' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
-            }`}
+            className={`p-1 sm:p-1.5 rounded-lg transition cursor-pointer ${isDarkTheme ? 'text-zinc-400 hover:text-white hover:bg-zinc-800' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
+              }`}
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -163,7 +164,7 @@ export default function ExpressionList({
       </div>
 
       {/* Customizable Expression List */}
-      <div className="flex-1 overflow-y-auto p-2 sm:p-3 space-y-2.5 sm:space-y-3 min-w-0">
+      <div className="flex-1 overflow-y-auto p-2 sm:p-3 pt-0 space-y-2.5 sm:space-y-3 min-w-0">
         {expressions.map((expr, index) => {
           const analysis = analyses[expr.id];
           const isCustomizing = editingSettingsId === expr.id;
@@ -185,15 +186,14 @@ export default function ExpressionList({
           return (
             <div
               key={expr.id}
-              className={`p-2.5 sm:p-3 rounded-xl border transition-all min-w-0 overflow-hidden ${
-                activeInputId === expr.id
-                  ? isDarkTheme
-                    ? 'border-[#1DB954]/80 bg-zinc-800/80 shadow-lg shadow-[#1DB954]/10'
-                    : 'border-[#1DB954]/80 bg-zinc-50 shadow-md shadow-[#1DB954]/10'
-                  : isDarkTheme
-                    ? 'border-zinc-800 bg-zinc-950/60 hover:border-zinc-700'
-                    : 'border-zinc-200 bg-white hover:border-zinc-300 shadow-sm'
-              }`}
+              className={`p-2.5 sm:p-3 rounded-lg  transition-all min-w-0  ${activeInputId === expr.id
+                ? isDarkTheme
+                  ? 'border-black/80 bg-[#212121]'
+                  : 'border border-[#1DB954] bg-white'
+                : isDarkTheme
+                  ? 'border-zinc-800 bg-zinc-950/60 '
+                  : 'border border-[#ebebeb] bg-white '
+                }`}
             >
               {/* Top Control Bar - Fully Responsive with flex-wrap and compact gaps */}
               <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 mb-2 min-w-0">
@@ -229,9 +229,8 @@ export default function ExpressionList({
                     />
                   </div>
 
-                  <span className={`text-[10px] font-mono px-1 py-0.5 rounded border flex-shrink-0 ${
-                    isDarkTheme ? 'text-zinc-500 bg-zinc-900/80 border-zinc-800' : 'text-zinc-600 bg-zinc-100 border-zinc-200'
-                  }`}>
+                  <span className={`text-[10px] font-mono px-1 py-0.5 rounded border flex-shrink-0 ${isDarkTheme ? 'text-zinc-500 bg-zinc-900/80 border-zinc-800' : 'text-zinc-600 bg-zinc-100 border-zinc-200'
+                    }`}>
                     #{index + 1}
                   </span>
                 </div>
@@ -241,13 +240,12 @@ export default function ExpressionList({
                   <button
                     onClick={() => setEditingSettingsId(isCustomizing ? null : expr.id)}
                     title="Customize Styling & Label"
-                    className={`w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center rounded transition cursor-pointer ${
-                      isCustomizing
-                        ? 'text-[#1DB954] bg-[#006241]/30 border border-[#1DB954]/40'
-                        : isDarkTheme
-                          ? 'text-zinc-400 hover:text-white hover:bg-zinc-800'
-                          : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
-                    }`}
+                    className={`w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center rounded transition cursor-pointer ${isCustomizing
+                      ? 'text-[#1DB954] bg-[#006241]/30 border border-[#1DB954]/40'
+                      : isDarkTheme
+                        ? 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+                        : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
+                      }`}
                   >
                     <Sliders className="w-3.5 h-3.5" />
                   </button>
@@ -257,11 +255,10 @@ export default function ExpressionList({
                       <button
                         onClick={() => onOpenAnalysis(expr.id)}
                         title="Calculus Analysis (Roots, Domain, Range, Asymptotes)"
-                        className={`w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center rounded transition cursor-pointer ${
-                          isDarkTheme
-                            ? 'text-zinc-400 hover:text-[#1DB954] hover:bg-zinc-800'
-                            : 'text-zinc-500 hover:text-[#1DB954] hover:bg-zinc-100'
-                        }`}
+                        className={`w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center rounded transition cursor-pointer ${isDarkTheme
+                          ? 'text-zinc-400 hover:text-[#1DB954] hover:bg-zinc-800'
+                          : 'text-zinc-500 hover:text-[#1DB954] hover:bg-zinc-100'
+                          }`}
                       >
                         <BarChart2 className="w-3.5 h-3.5" />
                       </button>
@@ -269,11 +266,10 @@ export default function ExpressionList({
                         <button
                           onClick={() => onOpenTable(expr.id)}
                           title="Table of Values (x vs f(x))"
-                          className={`w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center rounded transition cursor-pointer ${
-                            isDarkTheme
-                              ? 'text-zinc-400 hover:text-[#1DB954] hover:bg-zinc-800'
-                              : 'text-zinc-500 hover:text-[#1DB954] hover:bg-zinc-100'
-                          }`}
+                          className={`w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center rounded transition cursor-pointer ${isDarkTheme
+                            ? 'text-zinc-400 hover:text-[#1DB954] hover:bg-zinc-800'
+                            : 'text-zinc-500 hover:text-[#1DB954] hover:bg-zinc-100'
+                            }`}
                         >
                           <TableIcon className="w-3.5 h-3.5" />
                         </button>
@@ -282,11 +278,10 @@ export default function ExpressionList({
                         <button
                           onClick={() => onOpenIntegral(expr.id)}
                           title="Definite Integral & Riemann Sums"
-                          className={`w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center rounded transition cursor-pointer ${
-                            isDarkTheme
-                              ? 'text-zinc-400 hover:text-[#1DB954] hover:bg-zinc-800'
-                              : 'text-zinc-500 hover:text-[#1DB954] hover:bg-zinc-100'
-                          }`}
+                          className={`w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center rounded transition cursor-pointer ${isDarkTheme
+                            ? 'text-zinc-400 hover:text-[#1DB954] hover:bg-zinc-800'
+                            : 'text-zinc-500 hover:text-[#1DB954] hover:bg-zinc-100'
+                            }`}
                         >
                           <Sigma className="w-3.5 h-3.5" />
                         </button>
@@ -297,11 +292,10 @@ export default function ExpressionList({
                   <button
                     onClick={() => onDuplicateExpression(expr.id)}
                     title="Duplicate Expression"
-                    className={`w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center rounded transition cursor-pointer ${
-                      isDarkTheme
-                        ? 'text-zinc-400 hover:text-white hover:bg-zinc-800'
-                        : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
-                    }`}
+                    className={`w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center rounded transition cursor-pointer ${isDarkTheme
+                      ? 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+                      : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
+                      }`}
                   >
                     <Copy className="w-3.5 h-3.5" />
                   </button>
@@ -309,11 +303,10 @@ export default function ExpressionList({
                   <button
                     onClick={() => onUpdateExpression(expr.id, { visible: !expr.visible })}
                     title={expr.visible ? 'Hide Graph' : 'Show Graph'}
-                    className={`w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center rounded transition cursor-pointer ${
-                      isDarkTheme
-                        ? 'text-zinc-400 hover:text-white hover:bg-zinc-800'
-                        : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
-                    }`}
+                    className={`w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center rounded transition cursor-pointer ${isDarkTheme
+                      ? 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+                      : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
+                      }`}
                   >
                     {expr.visible ? <Eye className="w-3.5 h-3.5 text-[#1DB954]" /> : <EyeOff className="w-3.5 h-3.5 text-zinc-400" />}
                   </button>
@@ -321,11 +314,10 @@ export default function ExpressionList({
                   <button
                     onClick={() => onDeleteExpression(expr.id)}
                     title="Delete Expression"
-                    className={`w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center rounded transition cursor-pointer ${
-                      isDarkTheme
-                        ? 'text-zinc-400 hover:text-[#1DB954] hover:bg-zinc-800'
-                        : 'text-zinc-500 hover:text-[#1DB954] hover:bg-zinc-100'
-                    }`}
+                    className={`w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center rounded transition cursor-pointer ${isDarkTheme
+                      ? 'text-zinc-400 hover:text-[#1DB954] hover:bg-zinc-800'
+                      : 'text-zinc-500 hover:text-[#1DB954] hover:bg-zinc-100'
+                      }`}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -334,9 +326,8 @@ export default function ExpressionList({
 
               {/* Custom Settings Panel - Mobile Responsive Grid & Compact Padding */}
               {isCustomizing && (
-                <div className={`mb-2.5 p-2 sm:p-2.5 rounded-lg space-y-2 text-xs min-w-0 border ${
-                  isDarkTheme ? 'bg-zinc-900/90 border-zinc-800 text-zinc-200' : 'bg-zinc-50 border-zinc-200 text-zinc-800'
-                }`}>
+                <div className={`mb-2.5 p-2 sm:p-2.5 rounded-lg space-y-2 text-xs min-w-0 border ${isDarkTheme ? 'bg-zinc-900/90 border-zinc-800 text-zinc-200' : 'bg-zinc-50 border-zinc-200 text-zinc-800'
+                  }`}>
                   {/* Label */}
                   <div>
                     <label className={`text-[10px] font-medium block mb-1 ${isDarkTheme ? 'text-zinc-400' : 'text-zinc-600'}`}>
@@ -347,11 +338,10 @@ export default function ExpressionList({
                       value={expr.label || ''}
                       onChange={(e) => onUpdateExpression(expr.id, { label: e.target.value })}
                       placeholder="e.g. Parabola / Conic"
-                      className={`w-full rounded px-2 py-1 text-xs focus:outline-none focus:border-[#1DB954] border ${
-                        isDarkTheme
-                          ? 'bg-zinc-950 border-zinc-700/80 text-white'
-                          : 'bg-white border-zinc-300 text-zinc-900'
-                      }`}
+                      className={`w-full rounded px-2 py-1 text-xs focus:outline-none focus:border-[#1DB954] border ${isDarkTheme
+                        ? 'bg-zinc-950 border-zinc-700/80 text-white'
+                        : 'bg-white border-zinc-300 text-zinc-900'
+                        }`}
                     />
                   </div>
 
@@ -405,13 +395,12 @@ export default function ExpressionList({
                             key={c}
                             onClick={() => onUpdateExpression(expr.id, { color: c })}
                             title={`Select color ${c}`}
-                            className={`w-5 h-5 rounded-full transition transform hover:scale-125 cursor-pointer flex-shrink-0 ${
-                              isSelected
-                                ? isDarkTheme
-                                  ? 'ring-2 ring-white ring-offset-1 ring-offset-zinc-900 scale-110'
-                                  : 'ring-2 ring-zinc-900 ring-offset-1 ring-offset-white scale-110'
-                                : 'opacity-85 hover:opacity-100'
-                            }`}
+                            className={`w-5 h-5 rounded-full transition transform hover:scale-125 cursor-pointer flex-shrink-0 ${isSelected
+                              ? isDarkTheme
+                                ? 'ring-2 ring-white ring-offset-1 ring-offset-zinc-900 scale-110'
+                                : 'ring-2 ring-zinc-900 ring-offset-1 ring-offset-white scale-110'
+                              : 'opacity-85 hover:opacity-100'
+                              }`}
                             style={{ backgroundColor: c }}
                           />
                         );
@@ -434,11 +423,10 @@ export default function ExpressionList({
                       onFocus={() => setActiveInputId(expr.id)}
                       onChange={(e) => onUpdateExpression(expr.id, { parametricX: e.target.value })}
                       placeholder="3 * cos(t)"
-                      className={`min-w-0 flex-1 border rounded px-2 py-1 text-xs font-mono focus:outline-none focus:border-[#1DB954] ${
-                        isDarkTheme
-                          ? 'bg-zinc-900 border-zinc-700/80 text-white'
-                          : 'bg-zinc-50 border-zinc-300 text-zinc-900'
-                      }`}
+                      className={`min-w-0 flex-1 border rounded px-2 py-1 text-xs font-mono focus:outline-none focus:border-[#1DB954] ${isDarkTheme
+                        ? 'bg-zinc-900 border-zinc-700/80 text-white'
+                        : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                        }`}
                     />
                   </div>
                   <div className="flex items-center gap-1.5 min-w-0">
@@ -451,11 +439,10 @@ export default function ExpressionList({
                       onFocus={() => setActiveInputId(expr.id)}
                       onChange={(e) => onUpdateExpression(expr.id, { parametricY: e.target.value })}
                       placeholder="3 * sin(t)"
-                      className={`min-w-0 flex-1 border rounded px-2 py-1 text-xs font-mono focus:outline-none focus:border-[#1DB954] ${
-                        isDarkTheme
-                          ? 'bg-zinc-900 border-zinc-700/80 text-white'
-                          : 'bg-zinc-50 border-zinc-300 text-zinc-900'
-                      }`}
+                      className={`min-w-0 flex-1 border rounded px-2 py-1 text-xs font-mono focus:outline-none focus:border-[#1DB954] ${isDarkTheme
+                        ? 'bg-zinc-900 border-zinc-700/80 text-white'
+                        : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                        }`}
                     />
                   </div>
                 </div>
@@ -479,11 +466,10 @@ export default function ExpressionList({
                               ? 'y^2'
                               : 'sqrt(x)'
                       }
-                      className={`min-w-0 flex-1 border rounded px-2.5 py-1 text-xs font-mono focus:outline-none focus:border-[#1DB954] ${
-                        isDarkTheme
-                          ? 'bg-zinc-900 border-zinc-700/80 text-white'
-                          : 'bg-zinc-50 border-zinc-300 text-zinc-900'
-                      }`}
+                      className={`min-w-0 flex-1 border rounded px-2.5 py-1 text-xs font-mono focus:outline-none focus:border-[#1DB954] ${isDarkTheme
+                        ? 'bg-zinc-900 border-zinc-700/80 text-white'
+                        : 'bg-zinc-50 border-zinc-300 text-zinc-900'
+                        }`}
                     />
                   </div>
                 </div>
@@ -491,9 +477,8 @@ export default function ExpressionList({
 
               {/* LaTeX Render Preview & Quick Summary */}
               {expr.rawText && (
-                <div className={`mt-2 pt-2 border-t flex items-center justify-between gap-2 text-xs min-w-0 ${
-                  isDarkTheme ? 'border-zinc-800/80' : 'border-zinc-200'
-                }`}>
+                <div className={`mt-2 pt-2 border-t flex items-center justify-between gap-2 text-xs min-w-0 ${isDarkTheme ? 'border-zinc-800/80' : 'border-zinc-200'
+                  }`}>
                   <div className="truncate min-w-0 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
                     {expr.label && (
                       <span className="text-[10px] text-[#1DB954] font-semibold uppercase flex-shrink-0">

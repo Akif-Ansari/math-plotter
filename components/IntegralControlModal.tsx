@@ -132,13 +132,11 @@ export default function IntegralControlModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-2 sm:p-4 animate-in fade-in duration-200">
-      <div className={`border rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col transition-colors duration-200 ${
-        isDarkTheme ? 'bg-zinc-900 border-zinc-800 text-white' : 'bg-white border-zinc-200 text-zinc-900'
-      }`}>
-        {/* Modal Header */}
-        <div className={`px-4 py-3 sm:px-6 sm:py-4 border-b flex items-center justify-between ${
-          isDarkTheme ? 'bg-zinc-950/50 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
+      <div className={`border rounded-md shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col transition-colors duration-200 ${isDarkTheme ? 'bg-zinc-900 border-zinc-800 text-white' : 'bg-white border-zinc-200 text-zinc-900'
         }`}>
+        {/* Modal Header */}
+        <div className={`px-4 py-3 sm:px-6 sm:py-4 border-b flex items-center justify-between ${isDarkTheme ? 'bg-zinc-950/50 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
+          }`}>
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="p-1.5 sm:p-2 rounded-xl bg-[#006241]/20 border border-[#1DB954]/30 text-[#1DB954] flex-shrink-0">
               <Activity className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -154,9 +152,8 @@ export default function IntegralControlModal({
           </div>
           <button
             onClick={onClose}
-            className={`p-1.5 sm:p-2 rounded-lg transition flex-shrink-0 ${
-              isDarkTheme ? 'text-zinc-400 hover:text-white hover:bg-zinc-800' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
-            }`}
+            className={`p-1.5 sm:p-2 rounded-lg transition flex-shrink-0 ${isDarkTheme ? 'text-zinc-400 hover:text-white hover:bg-zinc-800' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
+              }`}
           >
             <X className="w-5 h-5" />
           </button>
@@ -165,9 +162,8 @@ export default function IntegralControlModal({
         {/* Modal Content */}
         <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto">
           {/* Master Enable Switch */}
-          <div className={`flex items-center justify-between p-4 border rounded-xl ${
-            isDarkTheme ? 'bg-zinc-950/70 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
-          }`}>
+          <div className={`flex items-center justify-between p-4 border rounded-xl ${isDarkTheme ? 'bg-zinc-950/70 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
+            }`}>
             <div>
               <span className={`font-semibold text-sm ${isDarkTheme ? 'text-zinc-200' : 'text-zinc-800'}`}>
                 Show Integral Area Shading
@@ -178,14 +174,12 @@ export default function IntegralControlModal({
             </div>
             <button
               onClick={() => onChangeConfig({ ...config, enabled: !config.enabled })}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                config.enabled ? 'bg-[#1DB954]' : isDarkTheme ? 'bg-zinc-700' : 'bg-zinc-300'
-              }`}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${config.enabled ? 'bg-[#1DB954]' : isDarkTheme ? 'bg-zinc-700' : 'bg-zinc-300'
+                }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  config.enabled ? 'translate-x-6' : 'translate-x-1'
-                }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${config.enabled ? 'translate-x-6' : 'translate-x-1'
+                  }`}
               />
             </button>
           </div>
@@ -236,9 +230,8 @@ export default function IntegralControlModal({
                 step="0.5"
                 value={config.a}
                 onChange={(e) => onChangeConfig({ ...config, a: parseFloat(e.target.value) || 0 })}
-                className={`w-full border text-xs rounded-lg p-2.5 focus:outline-none focus:border-[#1DB954] font-mono ${
-                  isDarkTheme ? 'bg-zinc-800 border-zinc-700 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-900'
-                }`}
+                className={`w-full border text-xs rounded-lg p-2.5 focus:outline-none focus:border-[#1DB954] font-mono ${isDarkTheme ? 'bg-zinc-800 border-zinc-700 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-900'
+                  }`}
               />
             </div>
             <div>
@@ -250,9 +243,8 @@ export default function IntegralControlModal({
                 step="0.5"
                 value={config.b}
                 onChange={(e) => onChangeConfig({ ...config, b: parseFloat(e.target.value) || 0 })}
-                className={`w-full border text-xs rounded-lg p-2.5 focus:outline-none focus:border-[#1DB954] font-mono ${
-                  isDarkTheme ? 'bg-zinc-800 border-zinc-700 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-900'
-                }`}
+                className={`w-full border text-xs rounded-lg p-2.5 focus:outline-none focus:border-[#1DB954] font-mono ${isDarkTheme ? 'bg-zinc-800 border-zinc-700 text-zinc-200' : 'bg-white border-zinc-300 text-zinc-900'
+                  }`}
               />
             </div>
           </div>
@@ -273,13 +265,12 @@ export default function IntegralControlModal({
                 <button
                   key={item.id}
                   onClick={() => onChangeConfig({ ...config, method: item.id as IntegralConfig['method'] })}
-                  className={`p-2.5 rounded-lg text-xs font-medium border transition ${
-                    config.method === item.id
-                      ? 'bg-[#006241] border-[#1DB954] text-white shadow-md'
-                      : isDarkTheme
-                        ? 'bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-700'
-                        : 'bg-zinc-100 border-zinc-300 text-zinc-700 hover:bg-zinc-200'
-                  }`}
+                  className={`p-2.5 rounded-lg text-xs font-medium border transition ${config.method === item.id
+                    ? 'bg-[#006241] border-[#1DB954] text-white shadow-md'
+                    : isDarkTheme
+                      ? 'bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-700'
+                      : 'bg-zinc-100 border-zinc-300 text-zinc-700 hover:bg-zinc-200'
+                    }`}
                 >
                   {item.label}
                 </button>
@@ -309,9 +300,8 @@ export default function IntegralControlModal({
           )}
 
           {/* Live Calculation Results Card */}
-          <div className={`p-4 rounded-xl space-y-2 font-mono text-xs border ${
-            isDarkTheme ? 'bg-[#006241]/20 border-[#1DB954]/30' : 'bg-[#006241]/10 border-[#1DB954]/30'
-          }`}>
+          <div className={`p-4 rounded-xl space-y-2 font-mono text-xs border ${isDarkTheme ? 'bg-[#006241]/20 border-[#1DB954]/30' : 'bg-[#006241]/10 border-[#1DB954]/30'
+            }`}>
             <div className="flex justify-between items-center text-[#1DB954]">
               <span className={isDarkTheme ? 'text-zinc-400' : 'text-zinc-600'}>Definite Integral ∫ₐᵇ f(x) dx:</span>
               <span className="text-base font-bold text-[#1DB954]">{integrationData.exact}</span>
@@ -332,9 +322,8 @@ export default function IntegralControlModal({
         </div>
 
         {/* Footer */}
-        <div className={`px-6 py-4 border-t flex justify-end ${
-          isDarkTheme ? 'bg-zinc-950/50 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
-        }`}>
+        <div className={`px-6 py-4 border-t flex justify-end ${isDarkTheme ? 'bg-zinc-950/50 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
+          }`}>
           <button
             onClick={onClose}
             className="flex items-center gap-1.5 px-4 py-2 bg-[#1DB954] hover:bg-[#18a349] text-black rounded-lg text-xs font-semibold transition cursor-pointer shadow-md shadow-[#1DB954]/20"

@@ -49,26 +49,23 @@ export default function ParameterSlidersBar({
   if (detectedParams.length === 0) return null;
 
   return (
-    <div className={`absolute bottom-4 left-3 sm:bottom-6 sm:left-6 z-20 backdrop-blur-md border p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-2xl font-mono text-xs w-[calc(100vw-1.5rem)] sm:w-80 max-w-sm space-y-2.5 sm:space-y-3 animate-in fade-in duration-200 ${
-      isDarkTheme
-        ? 'bg-zinc-900/95 border-[#1DB954]/40 text-zinc-100'
-        : 'bg-white/95 border-[#1DB954]/50 text-zinc-900 shadow-xl'
-    }`}>
-      {/* Header & Animation Control */}
-      <div className={`flex items-center justify-between border-b pb-2 ${
-        isDarkTheme ? 'border-zinc-800' : 'border-zinc-200'
+    <div className={`absolute bottom-4 left-3 sm:bottom-6 sm:left-6 z-20 backdrop-blur-md border p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-2xl font-mono text-xs w-[calc(100vw-1.5rem)] sm:w-80 max-w-sm space-y-2.5 sm:space-y-3 animate-in fade-in duration-200 ${isDarkTheme
+      ? "bg-[#212121] border-b-[#333] text-white"
+      : "bg-[#fafafa] border-b-[#ebebeb] text-black"
       }`}>
+      {/* Header & Animation Control */}
+      <div className={`flex items-center justify-between border-b pb-2 ${isDarkTheme ? 'border-zinc-800' : 'border-zinc-200'
+        }`}>
         <div className="flex items-center gap-2 font-bold text-[#1DB954]">
           <Sliders className="w-4 h-4" />
           <span>Dynamic Parameters</span>
         </div>
         <button
           onClick={() => setIsPlaying((prev) => !prev)}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-sans font-semibold transition cursor-pointer ${
-            isPlaying
-              ? 'bg-[#006241]/30 text-[#1DB954] border border-[#1DB954]/40 animate-pulse'
-              : 'bg-[#1DB954] hover:bg-[#18a349] text-black shadow-md shadow-[#1DB954]/20'
-          }`}
+          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-sans font-semibold transition cursor-pointer ${isPlaying
+            ? 'bg-[#006241]/30 text-[#1DB954] border border-[#1DB954]/40 animate-pulse'
+            : 'bg-[#1DB954] hover:bg-[#18a349] text-black shadow-md shadow-[#1DB954]/20'
+            }`}
         >
           {isPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
           {isPlaying ? 'Pause' : 'Animate'}
@@ -82,16 +79,14 @@ export default function ParameterSlidersBar({
           return (
             <div
               key={param}
-              className={`space-y-1 p-2.5 rounded-xl border ${
-                isDarkTheme ? 'bg-zinc-950/50 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
-              }`}
+              className={`space-y-1 p-2.5 rounded-xl border ${isDarkTheme ? 'bg-zinc-950/50 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
+                }`}
             >
               <div className="flex justify-between items-center text-[11px]">
                 <span className="font-bold text-[#1DB954]">{param} =</span>
                 <div className="flex items-center gap-2">
-                  <span className={`font-bold px-2 py-0.5 rounded border ${
-                    isDarkTheme ? 'text-white bg-zinc-800 border-zinc-700' : 'text-zinc-900 bg-white border-zinc-300 shadow-sm'
-                  }`}>
+                  <span className={`font-bold px-2 py-0.5 rounded border ${isDarkTheme ? 'text-white bg-zinc-800 border-zinc-700' : 'text-zinc-900 bg-white border-zinc-300 shadow-sm'
+                    }`}>
                     {val}
                   </span>
                   <button
@@ -110,9 +105,8 @@ export default function ParameterSlidersBar({
                 step="0.1"
                 value={val}
                 onChange={(e) => onChangeParameter(param, parseFloat(e.target.value))}
-                className={`w-full accent-[#1DB954] cursor-pointer h-1.5 rounded-lg ${
-                  isDarkTheme ? 'bg-zinc-800' : 'bg-zinc-200'
-                }`}
+                className={`w-full accent-[#1DB954] cursor-pointer h-1.5 rounded-lg ${isDarkTheme ? 'bg-zinc-800' : 'bg-zinc-200'
+                  }`}
               />
             </div>
           );
